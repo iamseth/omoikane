@@ -15,7 +15,7 @@ This document breaks the initial product plan into small, implementation-oriente
 | S07 | Ranked results and best-date summary | Done | S06 |
 | S08 | Admin token flow and event management | Done | S03 |
 | S09 | Mobile polish and accessibility pass | Done | S05, S07 |
-| S10 | Docker Compose deployment | Todo | S07 |
+| S10 | Docker Compose deployment | Done | S07 |
 
 Status values: `Todo`, `In Progress`, `Done`, `Blocked`
 
@@ -229,6 +229,12 @@ Acceptance criteria:
 Notes:
 - Keep the deployment path boring and portable.
 - Prefer one app container plus an optional proxy over multi-service complexity.
+
+Progress update (2026-04-04):
+- Added a multi-stage `Dockerfile` that builds the SvelteKit node server and runs it with production dependencies.
+- Added `docker-compose.yml` that exposes the app on port `3000` and mounts `./data` to persist the SQLite database.
+- Documented the container startup flow and supported runtime environment variables in `README.md`.
+- Verified the production container boots successfully and serves the app with the SQLite database stored in the mounted `data` directory.
 
 ## Suggested Slice Order
 
