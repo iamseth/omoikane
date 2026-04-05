@@ -1,13 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { getEventByAdminTokenHash, hashAdminToken, updateEvent } = vi.hoisted(() => ({
+const { getEventByAdminTokenHash, getParticipantResponsesForEvent, getRankedAvailabilityForEvent, hashAdminToken, updateEvent } = vi.hoisted(() => ({
 	getEventByAdminTokenHash: vi.fn(),
+	getParticipantResponsesForEvent: vi.fn(),
+	getRankedAvailabilityForEvent: vi.fn(),
 	hashAdminToken: vi.fn(),
 	updateEvent: vi.fn()
 }));
 
 vi.mock('$lib/server/database', () => ({
 	getEventByAdminTokenHash,
+	getParticipantResponsesForEvent,
+	getRankedAvailabilityForEvent,
 	updateEvent
 }));
 
@@ -21,6 +25,8 @@ describe('admin event page server', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		hashAdminToken.mockReturnValue('hashed-token');
+		getRankedAvailabilityForEvent.mockReturnValue([]);
+		getParticipantResponsesForEvent.mockReturnValue([]);
 	});
 
 	it('requires an admin token', async () => {
@@ -44,7 +50,11 @@ describe('admin event page server', () => {
 		const event = { id: 1, slug: 'planning' };
 		getEventByAdminTokenHash.mockReturnValue(event);
 
-		await expect(load({ params: { token: 'secret' } } as never)).resolves.toEqual({ event });
+		await expect(load({ params: { token: 'secret' } } as never)).resolves.toEqual({
+			event,
+			rankedDates: [],
+			participantResponses: []
+		});
 	});
 
 	it('rejects unsupported timezones on save', async () => {

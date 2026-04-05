@@ -139,6 +139,63 @@ describe('database', () => {
 		expect(module.getParticipantAvailability(event!.id, 'missing@example.com')).toBeUndefined();
 	});
 
+	it('returns participant responses for admin review sorted by latest update', async () => {
+		const { module } = await loadDatabaseModule();
+		const event = module.createEvent({
+			slug: 'admin-review',
+			adminTokenHash: 'review-token',
+			title: 'Admin Review',
+			timezone: 'UTC',
+			startDate: '2026-04-05',
+			endDate: '2026-04-18'
+		});
+
+		module.saveParticipantAvailability({
+			eventId: event!.id,
+			name: 'Taylor',
+			email: 'taylor@example.com',
+			selectedDates: ['2026-04-04', '2026-04-10']
+		});
+
+		module.saveParticipantAvailability({
+			eventId: event!.id,
+			name: 'Jordan',
+			email: 'jordan@example.com',
+			selectedDates: []
+		});
+
+		module.saveParticipantAvailability({
+			eventId: event!.id,
+			name: 'Taylor Updated',
+			email: 'taylor@example.com',
+			selectedDates: ['2026-04-12', '2026-04-20']
+		});
+
+		const responses = module.getParticipantResponsesForEvent(event!.id);
+
+		expect(responses).toHaveLength(2);
+		expect(responses.map((response) => response.participant.email)).toEqual([
+			'jordan@example.com',
+			'taylor@example.com'
+		]);
+		expect(responses).toEqual([
+			{
+				participant: expect.objectContaining({
+					name: 'Jordan',
+					email: 'jordan@example.com'
+				}),
+				selectedDates: []
+			},
+			{
+				participant: expect.objectContaining({
+					name: 'Taylor Updated',
+					email: 'taylor@example.com'
+				}),
+				selectedDates: ['2026-04-12']
+			}
+		]);
+	});
+
 	it('returns ranked availability counts sorted by popularity and date', async () => {
 		const { module } = await loadDatabaseModule();
 		const event = module.createEvent({

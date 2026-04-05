@@ -28,12 +28,45 @@
 			is_closed: number;
 			slug: string;
 		};
+		rankedDates: Array<{
+			date: string;
+			attendee_count: number;
+		}>;
+		participantResponses: Array<{
+			participant: {
+				name: string;
+				email: string;
+				updated_at: string;
+			};
+			selectedDates: string[];
+		}>;
 	};
 
 	let { data, form }: { data: AdminPageData; form?: AdminPageForm } = $props();
 
 	const event = $derived(data.event);
 	const publicPath = $derived(`/e/${event.slug}`);
+	const rankedDates = $derived(data.rankedDates);
+	const participantResponses = $derived(data.participantResponses);
+
+	const fullDateFormatter = new Intl.DateTimeFormat('en', {
+		dateStyle: 'long',
+		timeZone: 'UTC'
+	});
+
+	const updatedAtFormatter = new Intl.DateTimeFormat('en', {
+		dateStyle: 'medium',
+		timeStyle: 'short',
+		timeZone: 'UTC'
+	});
+
+	function formatDate(value: string) {
+		return fullDateFormatter.format(new Date(`${value}T00:00:00Z`));
+	}
+
+	function formatUpdatedAt(value: string) {
+		return updatedAtFormatter.format(new Date(`${value}Z`));
+	}
 </script>
 
 <svelte:head>
@@ -147,6 +180,64 @@
 			</form>
 		</section>
 	</div>
+
+	<div class="results-grid">
+		<section class="card results-card" aria-labelledby="admin-ranked-dates-heading">
+			<div>
+				<p class="section-title" id="admin-ranked-dates-heading">Ranked dates</p>
+				<p class="section-copy">Review which dates currently work for the most attendees.</p>
+			</div>
+
+			{#if rankedDates.length > 0}
+				<ol class="ranked-list">
+					{#each rankedDates as result}
+						<li>
+							<span>{formatDate(result.date)}</span>
+							<strong>{result.attendee_count} {result.attendee_count === 1 ? 'attendee' : 'attendees'}</strong>
+						</li>
+					{/each}
+				</ol>
+			{:else}
+				<p class="empty-state">No responses have been saved yet.</p>
+			{/if}
+		</section>
+
+		<section class="card responses-card" aria-labelledby="admin-responses-heading">
+			<div>
+				<p class="section-title" id="admin-responses-heading">Attendee responses</p>
+				<p class="section-copy">See who has responded and which in-range dates are still attached to each response.</p>
+			</div>
+
+			{#if participantResponses.length > 0}
+				<ul class="response-list">
+					{#each participantResponses as response}
+						<li>
+							<div class="response-header">
+								<div>
+									<p class="response-name">{response.participant.name}</p>
+									<p class="response-email">{response.participant.email}</p>
+								</div>
+								<p class="response-updated">Updated {formatUpdatedAt(response.participant.updated_at)}</p>
+							</div>
+
+							{#if response.selectedDates.length > 0}
+								<p class="response-count">{response.selectedDates.length} {response.selectedDates.length === 1 ? 'date' : 'dates'} selected</p>
+								<ul class="date-pill-list">
+									{#each response.selectedDates as date}
+										<li>{formatDate(date)}</li>
+									{/each}
+								</ul>
+							{:else}
+								<p class="empty-state">No in-range dates selected.</p>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<p class="empty-state">No attendee responses yet.</p>
+			{/if}
+		</section>
+	</div>
 </div>
 
 <style>
@@ -172,6 +263,14 @@
 		align-items: start;
 	}
 
+	.results-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+		gap: 1.5rem;
+		margin-top: 1.5rem;
+		align-items: start;
+	}
+
 	.card {
 		padding: 1.5rem;
 		border: 1px solid #334155;
@@ -181,7 +280,9 @@
 
 	.hero,
 	.form-card,
-	.status-card {
+	.status-card,
+	.results-card,
+	.responses-card {
 		display: grid;
 		gap: 1rem;
 	}
@@ -344,18 +445,106 @@
 		color: #f8fafc;
 	}
 
+	.ranked-list,
+	.response-list,
+	.date-pill-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.ranked-list,
+	.response-list {
+		display: grid;
+		gap: 0.9rem;
+	}
+
+	.ranked-list li,
+	.response-list li {
+		padding: 1rem;
+		border: 1px solid #334155;
+		border-radius: 0.9rem;
+		background: rgba(2, 6, 23, 0.58);
+	}
+
+	.ranked-list li {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.response-header {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		align-items: start;
+	}
+
+	.response-name,
+	.response-email,
+	.response-updated,
+	.response-count,
+	.empty-state {
+		color: #cbd5e1;
+	}
+
+	.response-name {
+		font-weight: 700;
+		color: #f8fafc;
+	}
+
+	.response-email,
+	.response-updated,
+	.response-count,
+	.empty-state {
+		font-size: 0.95rem;
+	}
+
+	.response-email,
+	.response-updated,
+	.empty-state {
+		color: #94a3b8;
+	}
+
+	.response-count {
+		margin-top: 0.85rem;
+	}
+
+	.date-pill-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem;
+		margin-top: 0.85rem;
+	}
+
+	.date-pill-list li {
+		padding: 0.45rem 0.75rem;
+		border-radius: 999px;
+		background: rgba(14, 165, 233, 0.16);
+		border: 1px solid rgba(56, 189, 248, 0.28);
+		color: #e0f2fe;
+	}
+
 	@media (max-width: 700px) {
 		.page {
 			padding-top: 3rem;
 		}
 
 		.content,
+		.results-grid,
 		.date-grid {
 			grid-template-columns: 1fr;
 		}
 
 		.hero-top {
 			flex-direction: column;
+		}
+
+		.ranked-list li,
+		.response-header {
+			flex-direction: column;
+			align-items: start;
 		}
 	}
 </style>

@@ -1,7 +1,12 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 
-import { getEventByAdminTokenHash, updateEvent } from '$lib/server/database';
+import {
+	getEventByAdminTokenHash,
+	getParticipantResponsesForEvent,
+	getRankedAvailabilityForEvent,
+	updateEvent
+} from '$lib/server/database';
 import { hashAdminToken } from '$lib/server/event-identity';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -72,8 +77,12 @@ export const load: ServerLoad = async ({ params }) => {
 		throw error(404, 'Admin link not found');
 	}
 
+	const event = getEventOr404(params.token);
+
 	return {
-		event: getEventOr404(params.token)
+		event,
+		rankedDates: getRankedAvailabilityForEvent(event.id),
+		participantResponses: getParticipantResponsesForEvent(event.id)
 	};
 };
 

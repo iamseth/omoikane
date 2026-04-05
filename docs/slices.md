@@ -19,6 +19,7 @@ This document breaks the initial product plan into small, implementation-oriente
 | S11 | Bug fixes from initial review | Done | S10 |
 | S12 | Fix Docker Hub publish in CI | Done | S10 |
 | S13 | Load saved attendee response by email | Done | S06, S08 |
+| S14 | Admin response overview | In Progress | S07, S08, S13 |
 
 Status values: `Todo`, `In Progress`, `Done`, `Blocked`
 
@@ -342,6 +343,31 @@ Progress update (2026-04-04):
 - Added a `loadSaved` public event-page action and UI control that repopulates the form with the attendee's saved name and selected dates.
 - Allowed closed events to keep the save path blocked while still letting attendees review a previously saved response.
 
+## S14: Admin response overview
+
+Goal: let an event owner inspect saved responses directly from the admin page.
+
+Deliverables:
+- Add an admin-facing query that lists participant responses for an event.
+- Show ranked dates on the admin page alongside attendee names and emails.
+- Show each attendee's currently in-range selected dates.
+- Keep the empty state clear when no one has responded yet.
+
+Acceptance criteria:
+- Visiting `/admin/:token` shows ranked dates without needing the public page.
+- The admin page lists saved attendee responses with names, emails, and selected dates.
+- Responses with dates now outside the event range only show still-valid dates.
+- The admin page handles events with zero responses gracefully.
+
+Notes:
+- Keep this read-only for now; editing attendee responses is out of scope.
+- Reuse the existing event and availability data rather than adding new tables.
+
+Progress update (2026-04-04):
+- Added an admin response query in the server data layer that returns each participant with only their current in-range selected dates.
+- Updated the admin page load and UI to show ranked dates plus a response list with attendee names, emails, and last-updated timestamps.
+- Added database coverage for the new admin response query, including empty selections and dates that fell outside the event range.
+
 ## Suggested Slice Order
 
 1. S01
@@ -357,6 +383,7 @@ Progress update (2026-04-04):
 11. S11
 12. S12
 13. S13
+14. S14
 
 ## Implementation Rules For Future Agents
 

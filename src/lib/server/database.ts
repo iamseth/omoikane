@@ -52,6 +52,11 @@ export type ParticipantAvailabilityRecord = {
 	selectedDates: string[];
 };
 
+export type ParticipantResponseRecord = {
+	participant: ParticipantRecord;
+	selectedDates: string[];
+};
+
 type UpdateEventInput = {
 	eventId: number;
 	title: string;
@@ -279,6 +284,57 @@ export function getParticipantAvailability(eventId: number, email: string) {
 		participant,
 		selectedDates: selectedDates.map(({ date }) => date)
 	} satisfies ParticipantAvailabilityRecord;
+}
+
+export function getParticipantResponsesForEvent(eventId: number) {
+	const db = initDatabase();
+	const rows = db
+		.prepare(
+			`select
+				participants.id,
+				participants.event_id,
+				participants.name,
+				participants.email,
+				participants.created_at,
+				participants.updated_at,
+				availability.date
+			from participants
+			inner join events on events.id = participants.event_id
+			left join availability
+				on availability.participant_id = participants.id
+				and availability.date between events.start_date and events.end_date
+			where participants.event_id = ?
+			order by participants.updated_at desc, participants.id desc, availability.date asc`
+		)
+		.all(eventId) as Array<ParticipantRecord & { date: string | null }>;
+
+	const responses = new Map<number, ParticipantResponseRecord>();
+
+	for (const row of rows) {
+		const existing = responses.get(row.id);
+
+		if (existing) {
+			if (row.date) {
+				existing.selectedDates.push(row.date);
+			}
+
+			continue;
+		}
+
+		responses.set(row.id, {
+			participant: {
+				id: row.id,
+				event_id: row.event_id,
+				name: row.name,
+				email: row.email,
+				created_at: row.created_at,
+				updated_at: row.updated_at
+			},
+			selectedDates: row.date ? [row.date] : []
+		});
+	}
+
+	return [...responses.values()];
 }
 
 export function getRankedAvailabilityForEvent(eventId: number) {
