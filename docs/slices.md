@@ -17,7 +17,7 @@ This document breaks the initial product plan into small, implementation-oriente
 | S09 | Mobile polish and accessibility pass | Done | S05, S07 |
 | S10 | Docker Compose deployment | Done | S07 |
 | S11 | Bug fixes from initial review | Done | S10 |
-| S12 | Fix Docker Hub publish in CI | Todo | S10 |
+| S12 | Fix Docker Hub publish in CI | Done | S10 |
 
 Status values: `Todo`, `In Progress`, `Done`, `Blocked`
 
@@ -311,6 +311,11 @@ Acceptance criteria:
 - Pushing to `master` with valid `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets publishes a Docker image tagged with the commit SHA and branch name.
 - Pushes to non-`master` branches skip the publish steps without error.
 - The workflow still runs lint, build, and test on all branches.
+
+Progress update (2026-04-04):
+- Changed the Docker Hub login and image-publish gates to require `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` from `secrets` directly.
+- Restricted Docker image publishing to the `master` branch so feature branches still run verification without pushing images.
+- Updated the Docker Hub username references in the login and tag configuration to use the same publish secrets consistently.
 
 ## Suggested Slice Order
 
