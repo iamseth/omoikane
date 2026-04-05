@@ -7,7 +7,7 @@
 
 # Omoikane
 
-![Omoikane logo](docs/assets/logo.png)
+<img src="docs/assets/logo.png" alt="Omoikane logo" width="50%" />
 
 Omoikane is a small scheduling app for finding the best date for a group event.
 
