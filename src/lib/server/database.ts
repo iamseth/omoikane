@@ -16,6 +16,15 @@ export type EventRecord = {
 	updated_at: string;
 };
 
+type ParticipantRecord = {
+	id: number;
+	event_id: number;
+	name: string;
+	email: string;
+	created_at: string;
+	updated_at: string;
+};
+
 type CreateEventInput = {
 	slug: string;
 	adminTokenHash: string;
@@ -24,6 +33,13 @@ type CreateEventInput = {
 	timezone: string;
 	startDate: string;
 	endDate: string;
+};
+
+type SaveParticipantAvailabilityInput = {
+	eventId: number;
+	name: string;
+	email: string;
+	selectedDates: string[];
 };
 
 const DEFAULT_DATABASE_PATH = resolve(process.cwd(), 'data/omoikane.sqlite');
@@ -127,7 +143,7 @@ export function createEvent(input: CreateEventInput) {
 	);
 
 	return getEventById(Number(result.lastInsertRowid));
-	}
+}
 
 export function getEventById(id: number) {
 	const db = initDatabase();
@@ -150,4 +166,50 @@ export function getEventCount() {
 	const db = initDatabase();
 	const row = db.prepare('select count(*) as count from events').get() as { count: number };
 	return row.count;
+}
+
+export function saveParticipantAvailability(input: SaveParticipantAvailabilityInput) {
+	const db = initDatabase();
+	const upsertParticipantStatement = db.prepare(`
+		insert into participants (event_id, name, email)
+		values (?, ?, ?)
+		on conflict (event_id, email) do update set
+			name = excluded.name,
+			updated_at = current_timestamp
+	`);
+	const getParticipantStatement = db.prepare(
+		'select * from participants where event_id = ? and email = ?'
+	);
+	const deleteAvailabilityStatement = db.prepare(
+		'delete from availability where participant_id = ?'
+	);
+	const insertAvailabilityStatement = db.prepare(
+		'insert into availability (event_id, participant_id, date) values (?, ?, ?)'
+	);
+
+	const saveAvailability = db.transaction((payload: SaveParticipantAvailabilityInput) => {
+		upsertParticipantStatement.run(payload.eventId, payload.name, payload.email);
+
+		const participant = getParticipantStatement.get(
+			payload.eventId,
+			payload.email
+		) as ParticipantRecord | undefined;
+
+		if (!participant) {
+			throw new Error('Participant could not be saved.');
+		}
+
+		deleteAvailabilityStatement.run(participant.id);
+
+		for (const date of payload.selectedDates) {
+			insertAvailabilityStatement.run(payload.eventId, participant.id, date);
+		}
+
+		return {
+			participant,
+			selectedDates: [...payload.selectedDates].sort()
+		};
+	});
+
+	return saveAvailability(input);
 }

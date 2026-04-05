@@ -11,7 +11,7 @@ This document breaks the initial product plan into small, implementation-oriente
 | S03 | Event creation flow | Done | S01, S02 |
 | S04 | Public event page shell | Done | S03 |
 | S05 | Interactive monthly calendar selection | Done | S04 |
-| S06 | Save and update attendee availability | Todo | S05 |
+| S06 | Save and update attendee availability | Done | S05 |
 | S07 | Ranked results and best-date summary | Todo | S06 |
 | S08 | Admin token flow and event management | Todo | S03 |
 | S09 | Mobile polish and accessibility pass | Todo | S05, S07 |
@@ -134,6 +134,11 @@ Acceptance criteria:
 Notes:
 - No email verification in v1.
 - Keep server validation strict and client validation helpful.
+
+Progress update (2026-04-04):
+- Added attendee save handling on the public event page.
+- Added strict server-side validation for name, email, and selected dates.
+- Upserted participants by `(event_id, email)` and replaced saved availability on re-submit.
 
 ## S07: Ranked results and best-date summary
 

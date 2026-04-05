@@ -1,4 +1,30 @@
 <script lang="ts">
+	type EventPageForm = {
+		errors?: {
+			name?: string;
+			email?: string;
+			selectedDates?: string;
+		};
+		message?: string;
+		success?: boolean;
+		values?: {
+			name?: string;
+			email?: string;
+			selectedDates?: string;
+		};
+	};
+
+	type EventPageData = {
+		event: {
+			title: string;
+			description: string | null;
+			timezone: string;
+			start_date: string;
+			end_date: string;
+		};
+		createdAdminPath: string | null;
+	};
+
 	type MonthView = {
 		year: number;
 		monthIndex: number;
@@ -13,7 +39,7 @@
 		isSelected: boolean;
 	};
 
-	let { data } = $props();
+	let { data, form }: { data: EventPageData; form?: EventPageForm } = $props();
 
 	const fullDateFormatter = new Intl.DateTimeFormat('en', {
 		dateStyle: 'long',
@@ -45,6 +71,10 @@
 		visibleMonth = getInitialMonth(event.timezone);
 	});
 
+	$effect(() => {
+		selectedDates = parseSelectedDatesValue(form?.values?.selectedDates);
+	});
+
 	const monthLabel = $derived(
 		monthLabelFormatter.format(new Date(Date.UTC(visibleMonth.year, visibleMonth.monthIndex, 1)))
 	);
@@ -57,6 +87,21 @@
 
 	function formatDate(value: string) {
 		return fullDateFormatter.format(new Date(`${value}T00:00:00Z`));
+	}
+
+	function parseSelectedDatesValue(value: string | undefined) {
+		if (!value) {
+			return [];
+		}
+
+		try {
+			const parsed = JSON.parse(value) as unknown;
+			return Array.isArray(parsed)
+				? parsed.filter((entry): entry is string => typeof entry === 'string').sort()
+				: [];
+		} catch {
+			return [];
+		}
 	}
 
 	function toggleDate(date: string) {
@@ -195,18 +240,32 @@
 			</div>
 		</section>
 
-		<section class="content">
-			<form class="details card">
+		<form method="POST" class="content">
+			<section class="details card">
 				<div>
 					<p class="section-title">Your response</p>
 					<p class="section-copy">
-						Enter your details before choosing dates. Saving arrives in the next slice.
+						Enter your details, pick your dates, and save your availability. Submitting again
+						with the same email updates your earlier response.
 					</p>
 				</div>
 
+				{#if form?.message}
+					<p class:success-message={form.success} class="form-message">{form.message}</p>
+				{/if}
+
 				<label>
 					<span>Name</span>
-					<input name="name" autocomplete="name" placeholder="Taylor" />
+					<input
+						name="name"
+						autocomplete="name"
+						placeholder="Taylor"
+						value={form?.values?.name ?? ''}
+						required
+					/>
+					{#if form?.errors?.name}
+						<small>{form.errors.name}</small>
+					{/if}
 				</label>
 
 				<label>
@@ -216,9 +275,18 @@
 						type="email"
 						autocomplete="email"
 						placeholder="taylor@example.com"
+						value={form?.values?.email ?? ''}
+						required
 					/>
+					{#if form?.errors?.email}
+						<small>{form.errors.email}</small>
+					{/if}
 				</label>
-			</form>
+
+				<input type="hidden" name="selectedDates" value={JSON.stringify(selectedDates)} />
+
+				<button type="submit" class="save-button">Save availability</button>
+			</section>
 
 			<section class="calendar card" aria-labelledby="calendar-heading">
 				<div class="calendar-top">
@@ -276,8 +344,12 @@
 				<section class="selection-summary" aria-labelledby="selected-dates-heading">
 					<div>
 						<p class="section-title" id="selected-dates-heading">Selected dates</p>
-						<p class="section-copy">Review the days you have picked before saving in the next slice.</p>
+						<p class="section-copy">Review the days you have picked before saving.</p>
 					</div>
+
+					{#if form?.errors?.selectedDates}
+						<p class="form-message">{form.errors.selectedDates}</p>
+					{/if}
 
 					{#if selectedDateSummary.length > 0}
 						<ul>
@@ -296,7 +368,7 @@
 					<p><span class="swatch selected"></span>Selected</p>
 				</div>
 			</section>
-		</section>
+		</form>
 	</div>
 
 <style>
@@ -421,6 +493,28 @@
 	button:focus {
 		outline: 2px solid #38bdf8;
 		outline-offset: 2px;
+	}
+
+	small,
+	.form-message {
+		color: #fda4af;
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+
+	.success-message {
+		color: #86efac;
+	}
+
+	.save-button {
+		justify-self: start;
+		padding: 0.85rem 1.25rem;
+		border: 0;
+		border-radius: 999px;
+		background: linear-gradient(135deg, #38bdf8, #818cf8);
+		color: #020617;
+		font-weight: 800;
+		cursor: pointer;
 	}
 
 	.calendar-top {
