@@ -12,7 +12,7 @@ This document breaks the initial product plan into small, implementation-oriente
 | S04 | Public event page shell | Done | S03 |
 | S05 | Interactive monthly calendar selection | Done | S04 |
 | S06 | Save and update attendee availability | Done | S05 |
-| S07 | Ranked results and best-date summary | Todo | S06 |
+| S07 | Ranked results and best-date summary | Done | S06 |
 | S08 | Admin token flow and event management | Todo | S03 |
 | S09 | Mobile polish and accessibility pass | Todo | S05, S07 |
 | S10 | Docker Compose deployment | Todo | S07 |
@@ -158,6 +158,11 @@ Acceptance criteria:
 Notes:
 - This is the core payoff of the product.
 - Do not add charting libraries.
+
+Progress update (2026-04-04):
+- Added a grouped availability query that ranks dates by attendee count, breaking ties by date.
+- Rendered a compact best-options summary near the top of the public event page.
+- Added a full ranked results list with clear empty-state messaging when no responses exist.
 
 ## S08: Admin token flow and event management
 

@@ -1,7 +1,11 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 
-import { getEventBySlug, saveParticipantAvailability } from '$lib/server/database';
+import {
+	getEventBySlug,
+	getRankedAvailabilityForEvent,
+	saveParticipantAvailability
+} from '$lib/server/database';
 
 const ADMIN_LINK_COOKIE = 'omoikane-created-admin-link';
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -110,7 +114,8 @@ export const load: ServerLoad = async ({ cookies, params }) => {
 
 	return {
 		event,
-		createdAdminPath
+		createdAdminPath,
+		rankedDates: getRankedAvailabilityForEvent(event.id)
 	};
 };
 

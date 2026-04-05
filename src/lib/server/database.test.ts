@@ -110,4 +110,43 @@ describe('database', () => {
 		expect(availability).toEqual([{ date: '2026-04-12' }]);
 		expect(secondSave.selectedDates).toEqual(['2026-04-12']);
 	});
+
+	it('returns ranked availability counts sorted by popularity and date', async () => {
+		const { module } = await loadDatabaseModule();
+		const event = module.createEvent({
+			slug: 'ranked-results',
+			adminTokenHash: 'ranked-token',
+			title: 'Ranked Results',
+			timezone: 'UTC',
+			startDate: '2026-04-05',
+			endDate: '2026-04-18'
+		});
+
+		module.saveParticipantAvailability({
+			eventId: event!.id,
+			name: 'Taylor',
+			email: 'taylor@example.com',
+			selectedDates: ['2026-04-10', '2026-04-12']
+		});
+
+		module.saveParticipantAvailability({
+			eventId: event!.id,
+			name: 'Jordan',
+			email: 'jordan@example.com',
+			selectedDates: ['2026-04-10', '2026-04-11']
+		});
+
+		module.saveParticipantAvailability({
+			eventId: event!.id,
+			name: 'Riley',
+			email: 'riley@example.com',
+			selectedDates: ['2026-04-11']
+		});
+
+		expect(module.getRankedAvailabilityForEvent(event!.id)).toEqual([
+			{ date: '2026-04-10', attendee_count: 2 },
+			{ date: '2026-04-11', attendee_count: 2 },
+			{ date: '2026-04-12', attendee_count: 1 }
+		]);
+	});
 });

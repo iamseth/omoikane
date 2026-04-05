@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { getEventBySlug, saveParticipantAvailability } = vi.hoisted(() => ({
+const { getEventBySlug, getRankedAvailabilityForEvent, saveParticipantAvailability } = vi.hoisted(() => ({
 	getEventBySlug: vi.fn(),
+	getRankedAvailabilityForEvent: vi.fn(),
 	saveParticipantAvailability: vi.fn()
 }));
 
 vi.mock('$lib/server/database', () => ({
 	getEventBySlug,
+	getRankedAvailabilityForEvent,
 	saveParticipantAvailability
 }));
 
@@ -31,29 +33,33 @@ describe('public event page server', () => {
 
 	it('returns the event and consumes a matching admin flash cookie', async () => {
 		const event = { id: 1, slug: 'planning', timezone: 'UTC' };
+		const rankedDates = [{ date: '2026-04-10', attendee_count: 2 }];
 		const cookies = {
 			get: vi.fn().mockReturnValue(JSON.stringify({ slug: 'planning', adminPath: '/admin/token' })),
 			delete: vi.fn()
 		};
 		getEventBySlug.mockReturnValue(event);
+		getRankedAvailabilityForEvent.mockReturnValue(rankedDates);
 
 		const result = await load({ cookies, params: { slug: 'planning' } } as never);
 
-		expect(result).toEqual({ event, createdAdminPath: '/admin/token' });
+		expect(result).toEqual({ event, createdAdminPath: '/admin/token', rankedDates });
 		expect(cookies.delete).toHaveBeenCalledWith('omoikane-created-admin-link', { path: '/' });
 	});
 
 	it('ignores malformed admin flash cookies', async () => {
 		const event = { id: 1, slug: 'planning', timezone: 'UTC' };
+		const rankedDates: Array<{ date: string; attendee_count: number }> = [];
 		const cookies = {
 			get: vi.fn().mockReturnValue('{bad-json'),
 			delete: vi.fn()
 		};
 		getEventBySlug.mockReturnValue(event);
+		getRankedAvailabilityForEvent.mockReturnValue(rankedDates);
 
 		const result = await load({ cookies, params: { slug: 'planning' } } as never);
 
-		expect(result).toEqual({ event, createdAdminPath: null });
+		expect(result).toEqual({ event, createdAdminPath: null, rankedDates });
 	});
 
 	it('returns validation errors for invalid attendee submissions', async () => {

@@ -16,6 +16,11 @@ export type EventRecord = {
 	updated_at: string;
 };
 
+export type RankedAvailabilityRecord = {
+	date: string;
+	attendee_count: number;
+};
+
 type ParticipantRecord = {
 	id: number;
 	event_id: number;
@@ -212,4 +217,20 @@ export function saveParticipantAvailability(input: SaveParticipantAvailabilityIn
 	});
 
 	return saveAvailability(input);
+}
+
+export function getRankedAvailabilityForEvent(eventId: number) {
+	const db = initDatabase();
+
+	return db
+		.prepare(
+			`select
+				date,
+				count(*) as attendee_count
+			from availability
+			where event_id = ?
+			group by date
+			order by attendee_count desc, date asc`
+		)
+		.all(eventId) as RankedAvailabilityRecord[];
 }

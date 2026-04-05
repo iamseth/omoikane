@@ -23,6 +23,10 @@
 			end_date: string;
 		};
 		createdAdminPath: string | null;
+		rankedDates: Array<{
+			date: string;
+			attendee_count: number;
+		}>;
 	};
 
 	type MonthView = {
@@ -60,13 +64,23 @@
 	const weekdayLabels = Array.from({ length: 7 }, (_, index) => {
 		return weekdayFormatter.format(new Date(Date.UTC(2024, 0, index + 7)));
 	});
-	const initialVisibleMonth = getInitialMonth(data.event.timezone);
 
 	const event = $derived(data.event);
 	const createdAdminPath = $derived(data.createdAdminPath);
+	const rankedDates = $derived(data.rankedDates);
 	const todayKey = $derived(getTodayKey(event.timezone));
-	let visibleMonth = $state<MonthView>(initialVisibleMonth);
+	let hasInitializedVisibleMonth = false;
+	let visibleMonth = $state<MonthView>({ year: 0, monthIndex: 0 });
 	let selectedDates = $state<string[]>([]);
+
+	$effect(() => {
+		if (hasInitializedVisibleMonth) {
+			return;
+		}
+
+		visibleMonth = getInitialMonth(event.timezone);
+		hasInitializedVisibleMonth = true;
+	});
 
 	$effect(() => {
 		selectedDates = parseSelectedDatesValue(form?.values?.selectedDates);
@@ -80,6 +94,7 @@
 		buildCalendarCells(visibleMonth, todayKey, event.start_date, event.end_date, selectedDates)
 	);
 
+	const bestDates = $derived(rankedDates.slice(0, 3));
 	const selectedDateSummary = $derived([...selectedDates].sort());
 
 	function formatDate(value: string) {
@@ -251,6 +266,28 @@
 					{formatDate(event.end_date)}
 				</p>
 			</div>
+
+			<section class="best-options" aria-labelledby="best-options-heading">
+				<div>
+					<p class="section-title" id="best-options-heading">Best options</p>
+					<p class="section-copy">
+						The most popular dates update automatically as responses come in.
+					</p>
+				</div>
+
+				{#if bestDates.length > 0}
+					<ul>
+						{#each bestDates as result}
+							<li>
+								<span>{formatDate(result.date)}</span>
+								<strong>{result.attendee_count} {result.attendee_count === 1 ? 'person' : 'people'}</strong>
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<p class="empty-selection">No responses yet. Results will appear after the first submission.</p>
+				{/if}
+			</section>
 		</section>
 
 		<form method="POST" class="content">
@@ -299,6 +336,28 @@
 				<input type="hidden" name="selectedDates" value={JSON.stringify(selectedDates)} />
 
 				<button type="submit" class="save-button">Save availability</button>
+
+				<section class="ranked-results" aria-labelledby="ranked-results-heading">
+					<div>
+						<p class="section-title" id="ranked-results-heading">Ranked dates</p>
+						<p class="section-copy">
+							See which days currently work for the most attendees.
+						</p>
+					</div>
+
+					{#if rankedDates.length > 0}
+						<ol>
+							{#each rankedDates as result}
+								<li>
+									<span>{formatDate(result.date)}</span>
+									<strong>{result.attendee_count} {result.attendee_count === 1 ? 'attendee' : 'attendees'}</strong>
+								</li>
+							{/each}
+						</ol>
+					{:else}
+						<p class="empty-selection">No availability has been saved yet.</p>
+					{/if}
+				</section>
 			</section>
 
 			<section class="calendar card" aria-labelledby="calendar-heading">
@@ -456,6 +515,40 @@
 		gap: 0.75rem;
 		margin-top: 1.5rem;
 		color: #cbd5e1;
+	}
+
+	.best-options,
+	.ranked-results {
+		display: grid;
+		gap: 0.85rem;
+		padding-top: 0.25rem;
+		border-top: 1px solid #1e293b;
+	}
+
+	.best-options ul,
+	.ranked-results ol {
+		display: grid;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.best-options li,
+	.ranked-results li {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.85rem 1rem;
+		border: 1px solid #334155;
+		border-radius: 0.85rem;
+		background: rgba(2, 6, 23, 0.65);
+		color: #cbd5e1;
+	}
+
+	.best-options li strong,
+	.ranked-results li strong {
+		white-space: nowrap;
 	}
 
 	.details,
@@ -721,6 +814,12 @@
 
 		.calendar-top {
 			flex-direction: column;
+		}
+
+		.best-options li,
+		.ranked-results li {
+			flex-direction: column;
+			align-items: start;
 		}
 
 		.month-nav {
