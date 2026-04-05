@@ -1,5 +1,10 @@
 # Omoikane
 
+[![Coverage](https://img.shields.io/badge/coverage-96.61%25-brightgreen)](./coverage/index.html)
+[![Quality](https://img.shields.io/badge/quality-checks%20passing-brightgreen)](https://github.com/iamseth/omoikane/actions/workflows/ci.yml)
+[![Actions](https://img.shields.io/github/actions/workflow/status/iamseth/omoikane/ci.yml?branch=master&label=actions)](https://github.com/iamseth/omoikane/actions/workflows/ci.yml)
+[![Docker Hub](https://img.shields.io/badge/docker%20hub-iamseth%2Fomoikane-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/r/iamseth/omoikane)
+
 Omoikane is a small scheduling app for finding the best date for a group event.
 
 ## Local Development
