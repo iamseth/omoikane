@@ -44,6 +44,11 @@
 		isSelected: boolean;
 	};
 
+	type CalendarStatus = {
+		label: string;
+		countLabel: string;
+	};
+
 	let { data, form }: { data: EventPageData; form?: EventPageForm } = $props();
 
 	const fullDateFormatter = new Intl.DateTimeFormat('en', {
@@ -97,9 +102,26 @@
 
 	const bestDates = $derived(rankedDates.slice(0, 3));
 	const selectedDateSummary = $derived([...selectedDates].sort());
+	const calendarStatus = $derived(getCalendarStatus(selectedDateSummary));
 
 	function formatDate(value: string) {
 		return fullDateFormatter.format(new Date(`${value}T00:00:00Z`));
+	}
+
+	function getCalendarStatus(dates: string[]): CalendarStatus {
+		if (dates.length === 0) {
+			return {
+				label: 'No dates selected yet.',
+				countLabel: '0 selected dates'
+			};
+		}
+
+		return {
+			label: `${dates.length} ${dates.length === 1 ? 'date is' : 'dates are'} selected: ${dates
+				.map((date) => formatDate(date))
+				.join(', ')}.`,
+			countLabel: `${dates.length} selected ${dates.length === 1 ? 'date' : 'dates'}`
+		};
 	}
 
 	function parseSelectedDatesValue(value: string | undefined) {
@@ -129,6 +151,18 @@
 		selectedDates = selectedDates.includes(date)
 			? selectedDates.filter((value) => value !== date)
 			: [...selectedDates, date];
+	}
+
+	function getDayButtonLabel(cell: CalendarCell) {
+		const states = [formatDate(cell.date)];
+
+		if (cell.isToday) {
+			states.push('today');
+		}
+
+		states.push(cell.isSelected ? 'selected' : 'not selected');
+
+		return states.join(', ');
 	}
 
 	function getDatePartsInTimeZone(
@@ -307,11 +341,11 @@
 			</section>
 		</section>
 
-		<form method="POST" class="content">
+		<form method="POST" class="content" aria-describedby="response-help">
 			<section class="details card">
 				<div>
 					<p class="section-title">Your response</p>
-					<p class="section-copy">
+					<p class="section-copy" id="response-help">
 						{#if event.is_closed}
 							This event is closed, so new responses cannot be submitted.
 						{:else}
@@ -322,12 +356,16 @@
 				</div>
 
 				{#if form?.message}
-					<p class:success-message={form.success} class="form-message">{form.message}</p>
+					<p class:success-message={form.success} class="form-message" role={form.success ? 'status' : 'alert'}>
+						{form.message}
+					</p>
 				{/if}
 
 				<label>
 					<span>Name</span>
 					<input
+						aria-describedby={form?.errors?.name ? 'name-error' : undefined}
+						aria-invalid={form?.errors?.name ? 'true' : undefined}
 						name="name"
 						autocomplete="name"
 						placeholder="Taylor"
@@ -336,13 +374,15 @@
 						required
 					/>
 					{#if form?.errors?.name}
-						<small>{form.errors.name}</small>
+						<small id="name-error">{form.errors.name}</small>
 					{/if}
 				</label>
 
 				<label>
 					<span>Email</span>
 					<input
+						aria-describedby={form?.errors?.email ? 'email-error' : undefined}
+						aria-invalid={form?.errors?.email ? 'true' : undefined}
 						name="email"
 						type="email"
 						autocomplete="email"
@@ -352,7 +392,7 @@
 						required
 					/>
 					{#if form?.errors?.email}
-						<small>{form.errors.email}</small>
+						<small id="email-error">{form.errors.email}</small>
 					{/if}
 				</label>
 
@@ -389,17 +429,27 @@
 				<div class="calendar-top">
 					<div>
 						<p class="section-title" id="calendar-heading">Choose dates</p>
-						<p class="section-copy">
+						<p class="section-copy" id="calendar-help">
 							Select the dates that work for you. Your choices stay in place while you browse months.
 						</p>
 					</div>
 
 					<div class="month-nav" aria-label="Month navigation">
-						<button type="button" class="nav-button" onclick={() => (visibleMonth = shiftMonth(visibleMonth, -1))}>
+						<button
+							type="button"
+							class="nav-button"
+							aria-label="Show previous month"
+							onclick={() => (visibleMonth = shiftMonth(visibleMonth, -1))}
+						>
 							Previous
 						</button>
-						<p>{monthLabel}</p>
-						<button type="button" class="nav-button" onclick={() => (visibleMonth = shiftMonth(visibleMonth, 1))}>
+						<p aria-live="polite">{monthLabel}</p>
+						<button
+							type="button"
+							class="nav-button"
+							aria-label="Show next month"
+							onclick={() => (visibleMonth = shiftMonth(visibleMonth, 1))}
+						>
 							Next
 						</button>
 					</div>
@@ -411,9 +461,11 @@
 					{/each}
 				</div>
 
-				<div class="grid" role="grid" aria-label={monthLabel}>
+				<div class="grid" role="grid" aria-describedby="calendar-help selected-dates-status" aria-label={monthLabel}>
 					{#each calendarCells as cell}
 						<div
+							aria-current={cell.isToday ? 'date' : undefined}
+							aria-selected={cell.isSelected}
 							class:outside-month={!cell.inCurrentMonth}
 							class:today={cell.isToday}
 							class:in-range={cell.isInEventRange}
@@ -426,6 +478,7 @@
 								<button
 									type="button"
 									class="day-button"
+									aria-label={getDayButtonLabel(cell)}
 									aria-pressed={cell.isSelected}
 									disabled={Boolean(event.is_closed)}
 									onclick={() => toggleDate(cell.date)}
@@ -439,17 +492,19 @@
 					{/each}
 				</div>
 
-				<section class="selection-summary" aria-labelledby="selected-dates-heading">
+				<section class="selection-summary" aria-labelledby="selected-dates-heading" aria-live="polite">
 					<div>
 						<p class="section-title" id="selected-dates-heading">Selected dates</p>
 						<p class="section-copy">Review the days you have picked before saving.</p>
+						<p class="sr-only" id="selected-dates-status">{calendarStatus.label}</p>
 					</div>
 
 					{#if form?.errors?.selectedDates}
-						<p class="form-message">{form.errors.selectedDates}</p>
+						<p class="form-message" id="selected-dates-error" role="alert">{form.errors.selectedDates}</p>
 					{/if}
 
 					{#if selectedDateSummary.length > 0}
+						<p class="selection-count" aria-hidden="true">{calendarStatus.countLabel}</p>
 						<ul>
 							{#each selectedDateSummary as date}
 								<li>{formatDate(date)}</li>
@@ -635,6 +690,18 @@
 		line-height: 1.5;
 	}
 
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
 	.success-message {
 		color: #86efac;
 	}
@@ -649,6 +716,7 @@
 
 	.save-button {
 		justify-self: start;
+		min-height: 3rem;
 		padding: 0.85rem 1.25rem;
 		border: 0;
 		border-radius: 999px;
@@ -688,6 +756,7 @@
 	}
 
 	.nav-button {
+		min-height: 2.75rem;
 		padding: 0.65rem 0.95rem;
 		border: 1px solid #475569;
 		border-radius: 999px;
@@ -717,7 +786,7 @@
 	}
 
 	.day {
-		min-height: 5.75rem;
+		min-height: 6rem;
 		border: 1px solid #334155;
 		border-radius: 1rem;
 		background: rgba(2, 6, 23, 0.8);
@@ -727,7 +796,7 @@
 	.day-button {
 		display: flex;
 		width: 100%;
-		min-height: 5.75rem;
+		min-height: 6rem;
 		padding: 0.75rem;
 		align-items: start;
 		justify-content: start;
@@ -766,7 +835,7 @@
 	}
 
 	.selected span {
-		background: rgba(224, 231, 255, 0.18);
+		background: rgba(224, 231, 255, 0.24);
 		color: #eef2ff;
 		font-weight: 800;
 	}
@@ -828,6 +897,12 @@
 		color: #cbd5e1;
 	}
 
+	.selection-count {
+		color: #cbd5e1;
+		font-size: 0.95rem;
+		font-weight: 700;
+	}
+
 	.selection-summary li + li {
 		margin-top: 0.4rem;
 	}
@@ -852,6 +927,13 @@
 
 		.content {
 			grid-template-columns: 1fr;
+			gap: 1rem;
+		}
+
+		.card,
+		.admin-banner {
+			padding: 1.2rem;
+			border-radius: 0.9rem;
 		}
 
 		.calendar-top {
@@ -877,13 +959,28 @@
 			flex: 1 1 0;
 		}
 
+		.save-button {
+			width: 100%;
+			justify-self: stretch;
+		}
+
+		.weekday-row,
+		.grid {
+			gap: 0.35rem;
+		}
+
 		.day {
-			min-height: 4.75rem;
+			min-height: 4.9rem;
 		}
 
 		.day-button {
-			min-height: 4.75rem;
+			min-height: 4.9rem;
 			padding: 0.55rem;
+		}
+
+		.day span {
+			width: 2.15rem;
+			height: 2.15rem;
 		}
 	}
 </style>

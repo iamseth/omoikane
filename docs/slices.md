@@ -14,7 +14,7 @@ This document breaks the initial product plan into small, implementation-oriente
 | S06 | Save and update attendee availability | Done | S05 |
 | S07 | Ranked results and best-date summary | Done | S06 |
 | S08 | Admin token flow and event management | Done | S03 |
-| S09 | Mobile polish and accessibility pass | Todo | S05, S07 |
+| S09 | Mobile polish and accessibility pass | Done | S05, S07 |
 | S10 | Docker Compose deployment | Todo | S07 |
 
 Status values: `Todo`, `In Progress`, `Done`, `Blocked`
@@ -205,6 +205,11 @@ Acceptance criteria:
 
 Notes:
 - Native browser usage on mobile is a first-class target.
+
+Progress update (2026-04-04):
+- Tightened the public event page layout for small screens with denser card spacing, full-width mobile submit controls, and larger tap targets for calendar days and month navigation.
+- Added clearer accessibility semantics for attendee submission states, including explicit error associations, live announcements for save feedback, and accessible labels for calendar navigation and day-selection buttons.
+- Improved calendar state communication for assistive tech by exposing selected-date status updates and strengthening the visual separation of today, in-range, and selected states.
 
 ## S10: Docker Compose deployment
 
