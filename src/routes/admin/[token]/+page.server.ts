@@ -5,6 +5,11 @@ import { getEventByAdminTokenHash, updateEvent } from '$lib/server/database';
 import { hashAdminToken } from '$lib/server/event-identity';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const SUPPORTED_TIMEZONES = new Set(Intl.supportedValuesOf('timeZone'));
+
+function isSupportedTimezone(timezone: string) {
+	return timezone === 'UTC' || SUPPORTED_TIMEZONES.has(timezone);
+}
 
 type EventFormValues = {
 	title: string;
@@ -33,6 +38,8 @@ function validateValues(values: EventFormValues) {
 
 	if (!values.timezone) {
 		errors.timezone = 'Enter a timezone.';
+	} else if (!isSupportedTimezone(values.timezone)) {
+		errors.timezone = 'Choose a valid timezone.';
 	}
 
 	if (!DATE_PATTERN.test(values.startDate)) {

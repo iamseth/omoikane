@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('$app/environment', () => ({
+	dev: false
+}));
+
 const { createEvent, generateAdminToken, generateEventSlug, hashAdminToken } = vi.hoisted(() => ({
 	createEvent: vi.fn(),
 	generateAdminToken: vi.fn(),
@@ -91,6 +95,23 @@ describe('new event page server', () => {
 		);
 	});
 
+	it('rejects unsupported timezones', async () => {
+		const formData = new FormData();
+		formData.set('title', 'Sprint planning');
+		formData.set('timezone', 'FakeZone');
+		formData.set('startDate', '2026-04-05');
+		formData.set('endDate', '2026-04-18');
+
+		const result = (await actions.default({
+			cookies: { set: vi.fn() },
+			request: new Request('http://localhost/new', { method: 'POST', body: formData })
+		} as never)) as { status: number; data: { errors: Record<string, string> } };
+
+		expect(result.status).toBe(400);
+		expect(result.data.errors.timezone).toBe('Choose a valid timezone.');
+		expect(createEvent).not.toHaveBeenCalled();
+	});
+
 	it('creates an event, sets the admin cookie, and redirects', async () => {
 		const cookies = { set: vi.fn() };
 		const formData = new FormData();
@@ -123,7 +144,59 @@ describe('new event page server', () => {
 		expect(cookies.set).toHaveBeenCalledWith(
 			'omoikane-created-admin-link',
 			JSON.stringify({ slug: 'freshslug', adminPath: '/admin/admin-token' }),
-			expect.objectContaining({ path: '/', httpOnly: true, sameSite: 'lax', maxAge: 60 })
+			expect.objectContaining({
+				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
+				secure: true,
+				maxAge: 60
+			})
 		);
+	});
+
+	it('retries once when event creation hits a slug collision', async () => {
+		const cookies = { set: vi.fn() };
+		const formData = new FormData();
+		formData.set('title', 'Sprint planning');
+		formData.set('timezone', 'UTC');
+		formData.set('startDate', '2026-04-05');
+		formData.set('endDate', '2026-04-18');
+		generateEventSlug.mockReturnValueOnce('firstslug').mockReturnValueOnce('secondslug');
+
+		const collisionError = Object.assign(new Error('UNIQUE constraint failed: events.slug'), {
+			code: 'SQLITE_CONSTRAINT_UNIQUE'
+		});
+		createEvent.mockImplementationOnce(() => {
+			throw collisionError;
+		});
+
+		await expect(
+			actions.default({
+				cookies,
+				request: new Request('http://localhost/new', { method: 'POST', body: formData })
+			} as never)
+		).rejects.toMatchObject({
+			status: 303,
+			location: '/e/secondslug'
+		});
+
+		expect(createEvent).toHaveBeenNthCalledWith(1, {
+			slug: 'firstslug',
+			adminTokenHash: 'hashed-admin-token',
+			title: 'Sprint planning',
+			description: null,
+			timezone: 'UTC',
+			startDate: '2026-04-05',
+			endDate: '2026-04-18'
+		});
+		expect(createEvent).toHaveBeenNthCalledWith(2, {
+			slug: 'secondslug',
+			adminTokenHash: 'hashed-admin-token',
+			title: 'Sprint planning',
+			description: null,
+			timezone: 'UTC',
+			startDate: '2026-04-05',
+			endDate: '2026-04-18'
+		});
 	});
 });

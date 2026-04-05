@@ -16,7 +16,7 @@ This document breaks the initial product plan into small, implementation-oriente
 | S08 | Admin token flow and event management | Done | S03 |
 | S09 | Mobile polish and accessibility pass | Done | S05, S07 |
 | S10 | Docker Compose deployment | Done | S07 |
-| S11 | Bug fixes from initial review | Todo | S10 |
+| S11 | Bug fixes from initial review | Done | S10 |
 | S12 | Fix Docker Hub publish in CI | Todo | S10 |
 
 Status values: `Todo`, `In Progress`, `Done`, `Blocked`
@@ -279,6 +279,11 @@ Acceptance criteria:
 - Concurrent event creation does not produce a 500 from a slug collision.
 - The admin link cookie is marked `secure` outside of dev mode.
 - `updateEvent` preserves any truthy-but-falsy description value.
+
+Progress update (2026-04-04):
+- Validated submitted timezones on both event creation and admin edit flows using `Intl.supportedValuesOf('timeZone')`, returning a field error for unsupported values.
+- Removed the slug pre-check race by relying on the database uniqueness constraint and retrying event creation once when a slug collision occurs.
+- Marked the admin-link flash cookie as `secure` outside development and aligned `updateEvent` description coercion with `createEvent` by using nullish coalescing.
 
 ## S12: Fix Docker Hub publish in CI
 

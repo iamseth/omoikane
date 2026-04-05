@@ -1,3 +1,4 @@
+import { dev } from '$app/environment';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 
@@ -5,6 +6,11 @@ import { createEvent } from '$lib/server/database';
 import { generateAdminToken, generateEventSlug, hashAdminToken } from '$lib/server/event-identity';
 
 const ADMIN_LINK_COOKIE = 'omoikane-created-admin-link';
+const SUPPORTED_TIMEZONES = new Set(Intl.supportedValuesOf('timeZone'));
+
+function isSupportedTimezone(timezone: string) {
+	return timezone === 'UTC' || SUPPORTED_TIMEZONES.has(timezone);
+}
 
 type EventFormValues = {
 	title: string;
@@ -57,6 +63,8 @@ function validateValues(values: EventFormValues) {
 
 	if (!values.timezone) {
 		errors.timezone = 'Enter a timezone.';
+	} else if (!isSupportedTimezone(values.timezone)) {
+		errors.timezone = 'Choose a valid timezone.';
 	}
 
 	if (!/^\d{4}-\d{2}-\d{2}$/.test(values.startDate)) {
@@ -72,6 +80,15 @@ function validateValues(values: EventFormValues) {
 	}
 
 	return errors;
+}
+
+function isSlugConflictError(error: unknown) {
+	return (
+		error instanceof Error &&
+		'code' in error &&
+		error.code === 'SQLITE_CONSTRAINT_UNIQUE' &&
+		error.message.includes('events.slug')
+	);
 }
 
 export const load: ServerLoad = async () => {
@@ -90,17 +107,30 @@ export const actions: Actions = {
 			return fail(400, { errors, values });
 		}
 
-		const slug = generateEventSlug();
 		const adminToken = generateAdminToken();
-		createEvent({
-			slug,
-			adminTokenHash: hashAdminToken(adminToken),
-			title: values.title,
-			description: values.description || null,
-			timezone: values.timezone,
-			startDate: values.startDate,
-			endDate: values.endDate
-		});
+		const adminTokenHash = hashAdminToken(adminToken);
+		let slug = '';
+
+		for (let attempt = 0; attempt < 2; attempt += 1) {
+			slug = generateEventSlug();
+
+			try {
+				createEvent({
+					slug,
+					adminTokenHash,
+					title: values.title,
+					description: values.description || null,
+					timezone: values.timezone,
+					startDate: values.startDate,
+					endDate: values.endDate
+				});
+				break;
+			} catch (error) {
+				if (attempt === 1 || !isSlugConflictError(error)) {
+					throw error;
+				}
+			}
+		}
 
 		cookies.set(
 			ADMIN_LINK_COOKIE,
@@ -112,6 +142,7 @@ export const actions: Actions = {
 				path: '/',
 				httpOnly: true,
 				sameSite: 'lax',
+				secure: !dev,
 				maxAge: 60
 			}
 		);

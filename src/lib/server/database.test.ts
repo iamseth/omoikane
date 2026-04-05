@@ -182,7 +182,7 @@ describe('database', () => {
 		expect(updated).toMatchObject({
 			id: event!.id,
 			title: 'Updated Title',
-			description: null,
+			description: '',
 			timezone: 'America/Los_Angeles',
 			start_date: '2026-04-07',
 			end_date: '2026-04-21',
@@ -191,5 +191,30 @@ describe('database', () => {
 		expect(module.getRankedAvailabilityForEvent(event!.id)).toEqual([
 			{ date: '2026-04-20', attendee_count: 1 }
 		]);
+	});
+
+	it('preserves descriptions that are falsy strings when updating an event', async () => {
+		const { module } = await loadDatabaseModule();
+		const event = module.createEvent({
+			slug: 'falsy-description',
+			adminTokenHash: 'admin-token',
+			title: 'Initial Title',
+			description: 'Initial description',
+			timezone: 'UTC',
+			startDate: '2026-04-05',
+			endDate: '2026-04-18'
+		});
+
+		const updated = module.updateEvent({
+			eventId: event!.id,
+			title: 'Updated Title',
+			description: '0',
+			timezone: 'UTC',
+			startDate: '2026-04-05',
+			endDate: '2026-04-18',
+			isClosed: false
+		});
+
+		expect(updated?.description).toBe('0');
 	});
 });

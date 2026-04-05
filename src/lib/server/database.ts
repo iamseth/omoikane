@@ -199,7 +199,7 @@ export function updateEvent(input: UpdateEventInput) {
 		where id = ?`
 	).run(
 		input.title,
-		input.description ? input.description : null,
+		input.description ?? null,
 		input.timezone,
 		input.startDate,
 		input.endDate,

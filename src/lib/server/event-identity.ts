@@ -1,7 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
 
-import { getEventBySlug } from '$lib/server/database';
-
 const SLUG_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
 
 function randomString(length: number, alphabet: string) {
@@ -24,13 +22,5 @@ export function hashAdminToken(token: string) {
 }
 
 export function generateEventSlug() {
-	for (let attempt = 0; attempt < 10; attempt += 1) {
-		const slug = randomString(8, SLUG_ALPHABET);
-
-		if (!getEventBySlug(slug)) {
-			return slug;
-		}
-	}
-
-	throw new Error('Unable to generate a unique event slug');
+	return randomString(8, SLUG_ALPHABET);
 }
