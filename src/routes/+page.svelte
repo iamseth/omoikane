@@ -2,9 +2,8 @@
 	let { data } = $props();
 
 	const nextSteps = [
-		'Save participant availability and support updates by email.',
-		'Render ranked date results with the best options summary.',
-		'Add admin editing and event open/closed management.'
+		'Polish the mobile layout and accessibility details.',
+		'Add Docker Compose deployment for local and small-server hosting.'
 	];
 </script>
 
@@ -14,7 +13,7 @@
 
 <div class="page">
 	<section>
-		<p class="eyebrow">Slice S05</p>
+		<p class="eyebrow">Slice S08</p>
 		<h1>Omoikane</h1>
 		<p class="lede">
 			A lightweight scheduling app for small groups to find the best date for an event.
@@ -25,8 +24,8 @@
 	<section>
 		<h2>Current state</h2>
 		<p>
-			The application now includes event creation, direct public event pages, and client-side
-			monthly date selection.
+			The application now includes event creation, public response collection, ranked date
+			results, and private admin management links.
 		</p>
 		<div class="status-card">
 			<p><strong>Database path</strong>: <code>{data.databasePath}</code></p>

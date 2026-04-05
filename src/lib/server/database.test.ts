@@ -149,4 +149,47 @@ describe('database', () => {
 			{ date: '2026-04-12', attendee_count: 1 }
 		]);
 	});
+
+	it('updates event details and open or closed state', async () => {
+		const { module } = await loadDatabaseModule();
+		const event = module.createEvent({
+			slug: 'admin-managed',
+			adminTokenHash: 'admin-token',
+			title: 'Initial Title',
+			description: 'Initial description',
+			timezone: 'UTC',
+			startDate: '2026-04-05',
+			endDate: '2026-04-18'
+		});
+
+		module.saveParticipantAvailability({
+			eventId: event!.id,
+			name: 'Taylor',
+			email: 'taylor@example.com',
+			selectedDates: ['2026-04-06', '2026-04-20']
+		});
+
+		const updated = module.updateEvent({
+			eventId: event!.id,
+			title: 'Updated Title',
+			description: '',
+			timezone: 'America/Los_Angeles',
+			startDate: '2026-04-07',
+			endDate: '2026-04-21',
+			isClosed: true
+		});
+
+		expect(updated).toMatchObject({
+			id: event!.id,
+			title: 'Updated Title',
+			description: null,
+			timezone: 'America/Los_Angeles',
+			start_date: '2026-04-07',
+			end_date: '2026-04-21',
+			is_closed: 1
+		});
+		expect(module.getRankedAvailabilityForEvent(event!.id)).toEqual([
+			{ date: '2026-04-20', attendee_count: 1 }
+		]);
+	});
 });

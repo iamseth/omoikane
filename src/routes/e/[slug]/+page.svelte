@@ -21,6 +21,7 @@
 			timezone: string;
 			start_date: string;
 			end_date: string;
+			is_closed: number;
 		};
 		createdAdminPath: string | null;
 		rankedDates: Array<{
@@ -117,6 +118,10 @@
 	}
 
 	function toggleDate(date: string) {
+		if (event.is_closed) {
+			return;
+		}
+
 		if (date < event.start_date || date > event.end_date) {
 			return;
 		}
@@ -265,7 +270,19 @@
 					<strong>Date range</strong>: {formatDate(event.start_date)} to
 					{formatDate(event.end_date)}
 				</p>
+				<p><strong>Status</strong>: {event.is_closed ? 'Closed' : 'Open'}</p>
 			</div>
+
+			{#if event.is_closed}
+				<section class="closed-banner" aria-labelledby="closed-event-heading">
+					<div>
+						<p class="section-title" id="closed-event-heading">This event is closed</p>
+						<p class="section-copy">
+							New availability submissions are disabled, but the saved results below are still visible.
+						</p>
+					</div>
+				</section>
+			{/if}
 
 			<section class="best-options" aria-labelledby="best-options-heading">
 				<div>
@@ -295,8 +312,12 @@
 				<div>
 					<p class="section-title">Your response</p>
 					<p class="section-copy">
+						{#if event.is_closed}
+							This event is closed, so new responses cannot be submitted.
+						{:else}
 						Enter your details, pick your dates, and save your availability. Submitting again
 						with the same email updates your earlier response.
+						{/if}
 					</p>
 				</div>
 
@@ -311,6 +332,7 @@
 						autocomplete="name"
 						placeholder="Taylor"
 						value={form?.values?.name ?? ''}
+						disabled={Boolean(event.is_closed)}
 						required
 					/>
 					{#if form?.errors?.name}
@@ -326,6 +348,7 @@
 						autocomplete="email"
 						placeholder="taylor@example.com"
 						value={form?.values?.email ?? ''}
+						disabled={Boolean(event.is_closed)}
 						required
 					/>
 					{#if form?.errors?.email}
@@ -335,7 +358,9 @@
 
 				<input type="hidden" name="selectedDates" value={JSON.stringify(selectedDates)} />
 
-				<button type="submit" class="save-button">Save availability</button>
+				<button type="submit" class="save-button" disabled={Boolean(event.is_closed)}>
+					Save availability
+				</button>
 
 				<section class="ranked-results" aria-labelledby="ranked-results-heading">
 					<div>
@@ -402,6 +427,7 @@
 									type="button"
 									class="day-button"
 									aria-pressed={cell.isSelected}
+									disabled={Boolean(event.is_closed)}
 									onclick={() => toggleDate(cell.date)}
 								>
 									<span>{cell.day}</span>
@@ -518,6 +544,7 @@
 	}
 
 	.best-options,
+	.closed-banner,
 	.ranked-results {
 		display: grid;
 		gap: 0.85rem;
@@ -612,6 +639,14 @@
 		color: #86efac;
 	}
 
+	.closed-banner {
+		margin-top: 1rem;
+		padding: 1rem;
+		border: 1px solid #be185d;
+		border-radius: 0.85rem;
+		background: rgba(80, 7, 36, 0.55);
+	}
+
 	.save-button {
 		justify-self: start;
 		padding: 0.85rem 1.25rem;
@@ -621,6 +656,13 @@
 		color: #020617;
 		font-weight: 800;
 		cursor: pointer;
+	}
+
+	.save-button:disabled,
+	.day-button:disabled,
+	input:disabled {
+		cursor: not-allowed;
+		opacity: 0.6;
 	}
 
 	.calendar-top {

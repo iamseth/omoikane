@@ -47,6 +47,16 @@ type SaveParticipantAvailabilityInput = {
 	selectedDates: string[];
 };
 
+type UpdateEventInput = {
+	eventId: number;
+	title: string;
+	description?: string | null;
+	timezone: string;
+	startDate: string;
+	endDate: string;
+	isClosed: boolean;
+};
+
 const DEFAULT_DATABASE_PATH = resolve(process.cwd(), 'data/omoikane.sqlite');
 
 let database: Database.Database | null = null;
@@ -173,6 +183,33 @@ export function getEventCount() {
 	return row.count;
 }
 
+export function updateEvent(input: UpdateEventInput) {
+	const db = initDatabase();
+
+	db.prepare(
+		`update events
+		set
+			title = ?,
+			description = ?,
+			timezone = ?,
+			start_date = ?,
+			end_date = ?,
+			is_closed = ?,
+			updated_at = current_timestamp
+		where id = ?`
+	).run(
+		input.title,
+		input.description ? input.description : null,
+		input.timezone,
+		input.startDate,
+		input.endDate,
+		input.isClosed ? 1 : 0,
+		input.eventId
+	);
+
+	return getEventById(input.eventId);
+}
+
 export function saveParticipantAvailability(input: SaveParticipantAvailabilityInput) {
 	const db = initDatabase();
 	const upsertParticipantStatement = db.prepare(`
@@ -228,7 +265,9 @@ export function getRankedAvailabilityForEvent(eventId: number) {
 				date,
 				count(*) as attendee_count
 			from availability
-			where event_id = ?
+			inner join events on events.id = availability.event_id
+			where availability.event_id = ?
+				and availability.date between events.start_date and events.end_date
 			group by date
 			order by attendee_count desc, date asc`
 		)

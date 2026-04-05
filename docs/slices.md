@@ -13,7 +13,7 @@ This document breaks the initial product plan into small, implementation-oriente
 | S05 | Interactive monthly calendar selection | Done | S04 |
 | S06 | Save and update attendee availability | Done | S05 |
 | S07 | Ranked results and best-date summary | Done | S06 |
-| S08 | Admin token flow and event management | Todo | S03 |
+| S08 | Admin token flow and event management | Done | S03 |
 | S09 | Mobile polish and accessibility pass | Todo | S05, S07 |
 | S10 | Docker Compose deployment | Todo | S07 |
 
@@ -182,6 +182,11 @@ Acceptance criteria:
 Notes:
 - This replaces an account system for v1.
 - Treat the admin URL as a bearer secret.
+
+Progress update (2026-04-04):
+- Implemented the admin page behind the bearer token and added event editing for title, description, timezone, and date range.
+- Added close and reopen controls on the admin page while keeping existing public results visible.
+- Updated the public event page to show clear closed-state messaging and block new submissions when an event is closed.
 
 ## S09: Mobile polish and accessibility pass
 
