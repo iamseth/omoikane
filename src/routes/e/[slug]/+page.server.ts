@@ -3,6 +3,7 @@ import type { Actions, ServerLoad } from '@sveltejs/kit';
 
 import {
 	getEventBySlug,
+	getParticipantAvailability,
 	getRankedAvailabilityForEvent,
 	saveParticipantAvailability
 } from '$lib/server/database';
@@ -120,6 +121,56 @@ export const load: ServerLoad = async ({ cookies, params }) => {
 };
 
 export const actions: Actions = {
+	loadSaved: async ({ params, request }) => {
+		if (!params.slug) {
+			throw error(404, 'Event not found');
+		}
+
+		const event = getEventBySlug(params.slug);
+
+		if (!event) {
+			throw error(404, 'Event not found');
+		}
+
+		const formData = await request.formData();
+		const values = readValues(formData);
+		const errors: Partial<Record<keyof AvailabilityFormValues, string>> = {};
+
+		if (!values.email) {
+			errors.email = 'Enter your email address to load a saved response.';
+		} else if (!EMAIL_PATTERN.test(values.email)) {
+			errors.email = 'Enter a valid email address.';
+		}
+
+		if (Object.keys(errors).length > 0) {
+			return fail(400, { errors, values });
+		}
+
+		const saved = getParticipantAvailability(event.id, values.email);
+
+		if (!saved) {
+			return fail(404, {
+				message: 'No saved availability was found for that email address yet.',
+				values
+			});
+		}
+
+		const selectedDates = saved.selectedDates.filter(
+			(date) => date >= event.start_date && date <= event.end_date
+		);
+
+		return {
+			success: true,
+			message: event.is_closed
+				? 'Loaded your saved availability. This event is closed, so changes cannot be submitted.'
+				: 'Loaded your saved availability. Update the dates and save again if anything changed.',
+			values: {
+				name: saved.participant.name,
+				email: saved.participant.email,
+				selectedDates: JSON.stringify(selectedDates)
+			}
+		};
+	},
 	default: async ({ params, request }) => {
 		if (!params.slug) {
 			throw error(404, 'Event not found');

@@ -18,6 +18,7 @@ This document breaks the initial product plan into small, implementation-oriente
 | S10 | Docker Compose deployment | Done | S07 |
 | S11 | Bug fixes from initial review | Done | S10 |
 | S12 | Fix Docker Hub publish in CI | Done | S10 |
+| S13 | Load saved attendee response by email | Done | S06, S08 |
 
 Status values: `Todo`, `In Progress`, `Done`, `Blocked`
 
@@ -317,6 +318,30 @@ Progress update (2026-04-04):
 - Restricted Docker image publishing to the `master` branch so feature branches still run verification without pushing images.
 - Updated the Docker Hub username references in the login and tag configuration to use the same publish secrets consistently.
 
+## S13: Load saved attendee response by email
+
+Goal: let an attendee pull their saved availability back into the public event page before updating it.
+
+Deliverables:
+- Add a read path for a participant's saved response by `(event_id, email)`.
+- Add a public event-page action that loads saved name and selected dates into the form.
+- Show a clear message when no saved response exists for the entered email.
+- Keep loaded selections constrained to the event's current date range.
+
+Acceptance criteria:
+- Entering an email with a saved response repopulates the attendee name and selected dates.
+- Entering an unknown email shows a user-facing message instead of failing silently.
+- Closed events still block new submissions while allowing saved responses to be reviewed.
+
+Notes:
+- Keep the retrieval flow synchronous and form-based.
+- Do not add authentication or email verification for this lookup in v1.
+
+Progress update (2026-04-04):
+- Added a participant availability lookup in the server data layer keyed by event and email.
+- Added a `loadSaved` public event-page action and UI control that repopulates the form with the attendee's saved name and selected dates.
+- Allowed closed events to keep the save path blocked while still letting attendees review a previously saved response.
+
 ## Suggested Slice Order
 
 1. S01
@@ -331,6 +356,7 @@ Progress update (2026-04-04):
 10. S10
 11. S11
 12. S12
+13. S13
 
 ## Implementation Rules For Future Agents
 

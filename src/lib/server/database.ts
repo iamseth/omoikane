@@ -47,6 +47,11 @@ type SaveParticipantAvailabilityInput = {
 	selectedDates: string[];
 };
 
+export type ParticipantAvailabilityRecord = {
+	participant: ParticipantRecord;
+	selectedDates: string[];
+};
+
 type UpdateEventInput = {
 	eventId: number;
 	title: string;
@@ -254,6 +259,26 @@ export function saveParticipantAvailability(input: SaveParticipantAvailabilityIn
 	});
 
 	return saveAvailability(input);
+}
+
+export function getParticipantAvailability(eventId: number, email: string) {
+	const db = initDatabase();
+	const participant = db
+		.prepare('select * from participants where event_id = ? and email = ?')
+		.get(eventId, email) as ParticipantRecord | undefined;
+
+	if (!participant) {
+		return undefined;
+	}
+
+	const selectedDates = db
+		.prepare('select date from availability where participant_id = ? order by date asc')
+		.all(participant.id) as Array<{ date: string }>;
+
+	return {
+		participant,
+		selectedDates: selectedDates.map(({ date }) => date)
+	} satisfies ParticipantAvailabilityRecord;
 }
 
 export function getRankedAvailabilityForEvent(eventId: number) {

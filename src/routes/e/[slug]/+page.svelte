@@ -337,10 +337,9 @@
 					<p class="section-title">Your response</p>
 					<p class="section-copy" id="response-help">
 						{#if event.is_closed}
-							This event is closed, so new responses cannot be submitted.
+							This event is closed, so new responses cannot be submitted. You can still load a saved response by email to review it.
 						{:else}
-						Enter your details, pick your dates, and save your availability. Submitting again
-						with the same email updates your earlier response.
+						Enter your details, pick your dates, and save your availability. You can also load a saved response with your email before making changes.
 						{/if}
 					</p>
 				</div>
@@ -360,7 +359,6 @@
 						autocomplete="name"
 						placeholder="Taylor"
 						value={form?.values?.name ?? ''}
-						disabled={Boolean(event.is_closed)}
 						required
 					/>
 					{#if form?.errors?.name}
@@ -378,7 +376,6 @@
 						autocomplete="email"
 						placeholder="taylor@example.com"
 						value={form?.values?.email ?? ''}
-						disabled={Boolean(event.is_closed)}
 						required
 					/>
 					{#if form?.errors?.email}
@@ -388,9 +385,19 @@
 
 				<input type="hidden" name="selectedDates" value={JSON.stringify(selectedDates)} />
 
-				<button type="submit" class="save-button" disabled={Boolean(event.is_closed)}>
-					Save availability
-				</button>
+				<div class="form-actions">
+					<button
+						type="submit"
+						class="load-button"
+						formaction="?/loadSaved"
+						formnovalidate
+					>
+						Load saved response
+					</button>
+					<button type="submit" class="save-button" disabled={Boolean(event.is_closed)}>
+						Save availability
+					</button>
+				</div>
 
 				<section class="ranked-results" aria-labelledby="ranked-results-heading">
 					<div>
@@ -716,6 +723,23 @@
 		cursor: pointer;
 	}
 
+	.form-actions {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.load-button {
+		min-height: 3rem;
+		padding: 0.85rem 1.25rem;
+		border: 1px solid #475569;
+		border-radius: 999px;
+		background: #020617;
+		color: #e2e8f0;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
 	.save-button:disabled,
 	.day-button:disabled,
 	input:disabled {
@@ -949,7 +973,12 @@
 			flex: 1 1 0;
 		}
 
-		.save-button {
+		.form-actions {
+			display: grid;
+		}
+
+		.save-button,
+		.load-button {
 			width: 100%;
 			justify-self: stretch;
 		}

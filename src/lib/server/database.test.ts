@@ -111,6 +111,34 @@ describe('database', () => {
 		expect(secondSave.selectedDates).toEqual(['2026-04-12']);
 	});
 
+	it('loads saved participant availability by event and email', async () => {
+		const { module } = await loadDatabaseModule();
+		const event = module.createEvent({
+			slug: 'load-response',
+			adminTokenHash: 'load-token',
+			title: 'Load Response',
+			timezone: 'UTC',
+			startDate: '2026-04-05',
+			endDate: '2026-04-18'
+		});
+
+		module.saveParticipantAvailability({
+			eventId: event!.id,
+			name: 'Taylor',
+			email: 'taylor@example.com',
+			selectedDates: ['2026-04-10', '2026-04-05']
+		});
+
+		expect(module.getParticipantAvailability(event!.id, 'taylor@example.com')).toMatchObject({
+			participant: {
+				name: 'Taylor',
+				email: 'taylor@example.com'
+			},
+			selectedDates: ['2026-04-05', '2026-04-10']
+		});
+		expect(module.getParticipantAvailability(event!.id, 'missing@example.com')).toBeUndefined();
+	});
+
 	it('returns ranked availability counts sorted by popularity and date', async () => {
 		const { module } = await loadDatabaseModule();
 		const event = module.createEvent({
