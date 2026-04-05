@@ -2,9 +2,9 @@
 	let { data } = $props();
 
 	const nextSteps = [
-		'Build event creation with a public slug and secret admin URL.',
-		'Render the event page shell with the monthly calendar.',
-		'Add participant availability submission and ranked results.'
+		'Save participant availability and support updates by email.',
+		'Render ranked date results with the best options summary.',
+		'Add admin editing and event open/closed management.'
 	];
 </script>
 
@@ -14,7 +14,7 @@
 
 <div class="page">
 	<section>
-		<p class="eyebrow">Slice S03</p>
+		<p class="eyebrow">Slice S05</p>
 		<h1>Omoikane</h1>
 		<p class="lede">
 			A lightweight scheduling app for small groups to find the best date for an event.
@@ -25,8 +25,8 @@
 	<section>
 		<h2>Current state</h2>
 		<p>
-			The application now includes SQLite persistence plus the first event creation flow with
-			public and admin URLs.
+			The application now includes event creation, direct public event pages, and client-side
+			monthly date selection.
 		</p>
 		<div class="status-card">
 			<p><strong>Database path</strong>: <code>{data.databasePath}</code></p>

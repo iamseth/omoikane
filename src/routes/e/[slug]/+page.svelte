@@ -10,6 +10,7 @@
 		inCurrentMonth: boolean;
 		isToday: boolean;
 		isInEventRange: boolean;
+		isSelected: boolean;
 	};
 
 	let { data } = $props();
@@ -38,6 +39,7 @@
 	const createdAdminPath = $derived(data.createdAdminPath);
 	const todayKey = $derived(getTodayKey(event.timezone));
 	let visibleMonth = $state<MonthView>({ year: 0, monthIndex: 0 });
+	let selectedDates = $state<string[]>([]);
 
 	$effect(() => {
 		visibleMonth = getInitialMonth(event.timezone);
@@ -48,11 +50,23 @@
 	);
 
 	const calendarCells = $derived(
-		buildCalendarCells(visibleMonth, todayKey, event.start_date, event.end_date)
+		buildCalendarCells(visibleMonth, todayKey, event.start_date, event.end_date, selectedDates)
 	);
+
+	const selectedDateSummary = $derived([...selectedDates].sort());
 
 	function formatDate(value: string) {
 		return fullDateFormatter.format(new Date(`${value}T00:00:00Z`));
+	}
+
+	function toggleDate(date: string) {
+		if (date < event.start_date || date > event.end_date) {
+			return;
+		}
+
+		selectedDates = selectedDates.includes(date)
+			? selectedDates.filter((value) => value !== date)
+			: [...selectedDates, date];
 	}
 
 	function getTodayKey(timeZone: string) {
@@ -105,8 +119,10 @@
 		month: MonthView,
 		today: string,
 		eventStart: string,
-		eventEnd: string
+		eventEnd: string,
+		selected: string[]
 	): CalendarCell[] {
+		const selectedSet = new Set(selected);
 		const firstWeekday = new Date(Date.UTC(month.year, month.monthIndex, 1)).getUTCDay();
 		const daysInMonth = getDaysInMonth(month.year, month.monthIndex);
 		const previousMonth = shiftMonth(month, -1);
@@ -137,7 +153,8 @@
 				day,
 				inCurrentMonth,
 				isToday: date === today,
-				isInEventRange: date >= eventStart && date <= eventEnd
+				isInEventRange: date >= eventStart && date <= eventEnd,
+				isSelected: selectedSet.has(date)
 			});
 		}
 
@@ -208,7 +225,7 @@
 					<div>
 						<p class="section-title" id="calendar-heading">Choose dates</p>
 						<p class="section-copy">
-							Only days inside the event window are active in later slices.
+							Select the dates that work for you. Your choices stay in place while you browse months.
 						</p>
 					</div>
 
@@ -235,18 +252,48 @@
 							class:outside-month={!cell.inCurrentMonth}
 							class:today={cell.isToday}
 							class:in-range={cell.isInEventRange}
+							class:selected={cell.isSelected}
 							class="day"
 							role="gridcell"
 							aria-label={formatDate(cell.date)}
 						>
-							<span>{cell.day}</span>
+							{#if cell.isInEventRange}
+								<button
+									type="button"
+									class="day-button"
+									aria-pressed={cell.isSelected}
+									onclick={() => toggleDate(cell.date)}
+								>
+									<span>{cell.day}</span>
+								</button>
+							{:else}
+								<span>{cell.day}</span>
+							{/if}
 						</div>
 					{/each}
 				</div>
 
+				<section class="selection-summary" aria-labelledby="selected-dates-heading">
+					<div>
+						<p class="section-title" id="selected-dates-heading">Selected dates</p>
+						<p class="section-copy">Review the days you have picked before saving in the next slice.</p>
+					</div>
+
+					{#if selectedDateSummary.length > 0}
+						<ul>
+							{#each selectedDateSummary as date}
+								<li>{formatDate(date)}</li>
+							{/each}
+						</ul>
+					{:else}
+						<p class="empty-selection">No dates selected yet.</p>
+					{/if}
+				</section>
+
 				<div class="legend" aria-label="Calendar legend">
 					<p><span class="swatch today"></span>Today</p>
 					<p><span class="swatch in-range"></span>Inside event range</p>
+					<p><span class="swatch selected"></span>Selected</p>
 				</div>
 			</section>
 		</section>
@@ -429,11 +476,24 @@
 
 	.day {
 		min-height: 5.75rem;
-		padding: 0.75rem;
 		border: 1px solid #334155;
 		border-radius: 1rem;
 		background: rgba(2, 6, 23, 0.8);
 		color: #cbd5e1;
+	}
+
+	.day-button {
+		display: flex;
+		width: 100%;
+		min-height: 5.75rem;
+		padding: 0.75rem;
+		align-items: start;
+		justify-content: start;
+		border: 0;
+		border-radius: inherit;
+		background: transparent;
+		color: inherit;
+		cursor: pointer;
 	}
 
 	.day span {
@@ -452,6 +512,21 @@
 	.in-range {
 		border-color: #0ea5e9;
 		background: rgba(8, 47, 73, 0.45);
+	}
+
+	.selected {
+		border-color: #818cf8;
+		background: rgba(49, 46, 129, 0.55);
+	}
+
+	.selected .day-button {
+		color: #eef2ff;
+	}
+
+	.selected span {
+		background: rgba(224, 231, 255, 0.18);
+		color: #eef2ff;
+		font-weight: 800;
 	}
 
 	.today span {
@@ -493,6 +568,32 @@
 		background: rgba(8, 47, 73, 0.9);
 	}
 
+	.swatch.selected {
+		border-color: #818cf8;
+		background: rgba(99, 102, 241, 0.9);
+	}
+
+	.selection-summary {
+		display: grid;
+		gap: 0.85rem;
+		padding-top: 0.25rem;
+		border-top: 1px solid #1e293b;
+	}
+
+	.selection-summary ul {
+		margin: 0;
+		padding-left: 1.25rem;
+		color: #cbd5e1;
+	}
+
+	.selection-summary li + li {
+		margin-top: 0.4rem;
+	}
+
+	.empty-selection {
+		color: #94a3b8;
+	}
+
 	a {
 		color: #bae6fd;
 		word-break: break-all;
@@ -529,6 +630,10 @@
 		}
 
 		.day {
+			min-height: 4.75rem;
+		}
+
+		.day-button {
 			min-height: 4.75rem;
 			padding: 0.55rem;
 		}

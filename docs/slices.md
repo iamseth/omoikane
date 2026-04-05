@@ -9,8 +9,8 @@ This document breaks the initial product plan into small, implementation-oriente
 | S01 | Scaffold app and local tooling | Done | - |
 | S02 | Database schema and persistence setup | Done | S01 |
 | S03 | Event creation flow | Done | S01, S02 |
-| S04 | Public event page shell | Todo | S03 |
-| S05 | Interactive monthly calendar selection | Todo | S04 |
+| S04 | Public event page shell | Done | S03 |
+| S05 | Interactive monthly calendar selection | Done | S04 |
 | S06 | Save and update attendee availability | Todo | S05 |
 | S07 | Ranked results and best-date summary | Todo | S06 |
 | S08 | Admin token flow and event management | Todo | S03 |
