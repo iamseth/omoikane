@@ -77,18 +77,10 @@
 </div>
 
 <style>
-	:global(body) {
-		margin: 0;
-		font-family:
-			Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-		background: #0f172a;
-		color: #e2e8f0;
-	}
-
 	.page {
 		max-width: 48rem;
 		margin: 0 auto;
-		padding: 4rem 1.5rem 5rem;
+		padding: 2.25rem 1.5rem 5rem;
 	}
 
 	.hero {
@@ -97,7 +89,7 @@
 
 	.eyebrow {
 		margin: 0 0 0.75rem;
-		color: #38bdf8;
+		color: var(--accent-orange);
 		font-size: 0.875rem;
 		font-weight: 700;
 		letter-spacing: 0.08em;
@@ -118,7 +110,7 @@
 
 	.lede {
 		margin-top: 0.75rem;
-		color: #cbd5e1;
+		color: var(--text-muted);
 		font-size: 1.05rem;
 		line-height: 1.7;
 	}
@@ -127,9 +119,10 @@
 		display: grid;
 		gap: 1.25rem;
 		padding: 1.5rem;
-		border: 1px solid #334155;
+		border: 1px solid var(--border);
 		border-radius: 1rem;
-		background: rgba(15, 23, 42, 0.78);
+		background: var(--surface);
+		box-shadow: var(--shadow);
 	}
 
 	label {
@@ -140,7 +133,7 @@
 	span {
 		font-size: 0.95rem;
 		font-weight: 600;
-		color: #f8fafc;
+		color: var(--text-strong);
 	}
 
 	input,
@@ -154,16 +147,16 @@
 		width: 100%;
 		box-sizing: border-box;
 		padding: 0.8rem 0.9rem;
-		border: 1px solid #475569;
+		border: 1px solid var(--border-strong);
 		border-radius: 0.75rem;
-		background: #020617;
-		color: #e2e8f0;
+		background: var(--surface-strong);
+		color: var(--text);
 	}
 
 	input:focus,
 	textarea:focus,
 	button:focus {
-		outline: 2px solid #38bdf8;
+		outline: 2px solid var(--accent-blue);
 		outline-offset: 2px;
 	}
 
@@ -176,8 +169,8 @@
 		padding: 0.85rem 1.25rem;
 		border: 0;
 		border-radius: 999px;
-		background: linear-gradient(135deg, #38bdf8, #818cf8);
-		color: #020617;
+		background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));
+		color: #ffffff;
 		font-weight: 700;
 		cursor: pointer;
 	}
@@ -189,7 +182,7 @@
 	}
 
 	small {
-		color: #fca5a5;
+		color: var(--danger);
 	}
 
 	@media (max-width: 640px) {

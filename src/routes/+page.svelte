@@ -48,18 +48,18 @@
 </div>
 
 <style>
-	:global(body) {
-		margin: 0;
-		font-family:
-			Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-		background: #0f172a;
-		color: #e2e8f0;
-	}
-
 	.page {
 		max-width: 48rem;
 		margin: 0 auto;
-		padding: 4rem 1.5rem 5rem;
+		padding: 2.25rem 1.5rem 5rem;
+	}
+
+	section {
+		padding: 1.5rem;
+		border: 1px solid var(--border);
+		border-radius: 1.25rem;
+		background: var(--surface);
+		box-shadow: var(--shadow);
 	}
 
 	section + section {
@@ -85,7 +85,7 @@
 	}
 
 	.eyebrow {
-		color: #38bdf8;
+		color: var(--accent-pink);
 		font-size: 0.875rem;
 		font-weight: 700;
 		letter-spacing: 0.08em;
@@ -96,7 +96,7 @@
 	.cta,
 	li,
 	section p {
-		color: #cbd5e1;
+		color: var(--text-muted);
 		font-size: 1.05rem;
 		line-height: 1.7;
 	}
@@ -109,10 +109,17 @@
 		display: inline-flex;
 		padding: 0.85rem 1.25rem;
 		border-radius: 999px;
-		background: linear-gradient(135deg, #38bdf8, #818cf8);
-		color: #020617;
+		background: linear-gradient(
+			135deg,
+			var(--accent-green),
+			var(--accent-yellow),
+			var(--accent-pink),
+			var(--accent-blue)
+		);
+		color: #ffffff;
 		font-weight: 700;
 		text-decoration: none;
+		box-shadow: 0 16px 30px rgba(244, 81, 151, 0.22);
 	}
 
 	ul {
@@ -125,15 +132,15 @@
 	}
 
 	strong {
-		color: #f8fafc;
+		color: var(--text-strong);
 	}
 
 	.status-card {
 		margin-top: 1rem;
 		padding: 1rem 1.125rem;
-		border: 1px solid #334155;
+		border: 1px solid rgba(64, 139, 239, 0.18);
 		border-radius: 0.75rem;
-		background: rgba(15, 23, 42, 0.65);
+		background: var(--surface-muted);
 	}
 
 	.status-card p + p {

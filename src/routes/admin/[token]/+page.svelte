@@ -241,18 +241,10 @@
 </div>
 
 <style>
-	:global(body) {
-		margin: 0;
-		font-family:
-			Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-		background: #0f172a;
-		color: #e2e8f0;
-	}
-
 	.page {
 		max-width: 72rem;
 		margin: 0 auto;
-		padding: 4rem 1.5rem 5rem;
+		padding: 2.25rem 1.5rem 5rem;
 	}
 
 	.content {
@@ -273,9 +265,10 @@
 
 	.card {
 		padding: 1.5rem;
-		border: 1px solid #334155;
+		border: 1px solid var(--border);
 		border-radius: 1rem;
-		background: rgba(15, 23, 42, 0.78);
+		background: var(--surface);
+		box-shadow: var(--shadow);
 	}
 
 	.hero,
@@ -296,7 +289,7 @@
 
 	.eyebrow {
 		margin: 0 0 0.75rem;
-		color: #38bdf8;
+		color: var(--accent-purple);
 		font-size: 0.875rem;
 		font-weight: 700;
 		letter-spacing: 0.08em;
@@ -321,7 +314,7 @@
 	.lede,
 	.meta,
 	.section-copy {
-		color: #cbd5e1;
+		color: var(--text-muted);
 		line-height: 1.7;
 	}
 
@@ -329,18 +322,18 @@
 		display: grid;
 		gap: 0.75rem;
 		padding-top: 1rem;
-		border-top: 1px solid #1e293b;
+		border-top: 1px solid var(--border);
 	}
 
 	.section-title {
 		font-size: 1.1rem;
 		font-weight: 700;
-		color: #f8fafc;
+		color: var(--text-strong);
 	}
 
 	.section-copy {
 		margin-top: 0.35rem;
-		color: #94a3b8;
+		color: var(--text-muted);
 	}
 
 	label {
@@ -351,7 +344,7 @@
 	span {
 		font-size: 0.95rem;
 		font-weight: 600;
-		color: #f8fafc;
+		color: var(--text-strong);
 	}
 
 	input,
@@ -365,10 +358,10 @@
 		width: 100%;
 		box-sizing: border-box;
 		padding: 0.8rem 0.9rem;
-		border: 1px solid #475569;
+		border: 1px solid var(--border-strong);
 		border-radius: 0.75rem;
-		background: #020617;
-		color: #e2e8f0;
+		background: var(--surface-strong);
+		color: var(--text);
 	}
 
 	textarea {
@@ -378,19 +371,19 @@
 	input:focus,
 	textarea:focus,
 	button:focus {
-		outline: 2px solid #38bdf8;
+		outline: 2px solid var(--accent-blue);
 		outline-offset: 2px;
 	}
 
 	small,
 	.form-message {
-		color: #fda4af;
+		color: var(--danger);
 		font-size: 0.95rem;
 		line-height: 1.5;
 	}
 
 	.success-message {
-		color: #86efac;
+		color: var(--success);
 	}
 
 	.date-grid {
@@ -418,8 +411,8 @@
 
 	.primary-button {
 		justify-self: start;
-		background: linear-gradient(135deg, #38bdf8, #818cf8);
-		color: #020617;
+		background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));
+		color: #ffffff;
 	}
 
 	.status-pill {
@@ -427,22 +420,21 @@
 	}
 
 	.event-open {
-		background: rgba(22, 163, 74, 0.18);
-		color: #86efac;
+		background: rgba(53, 201, 95, 0.14);
+		color: var(--success);
 	}
 
 	.event-closed {
-		background: rgba(190, 24, 93, 0.2);
-		color: #fda4af;
+		background: rgba(244, 81, 151, 0.14);
+		color: var(--danger);
 	}
 
-	a {
-		color: #bae6fd;
+	.meta a {
 		word-break: break-all;
 	}
 
 	strong {
-		color: #f8fafc;
+		color: var(--text-strong);
 	}
 
 	.ranked-list,
@@ -462,9 +454,9 @@
 	.ranked-list li,
 	.response-list li {
 		padding: 1rem;
-		border: 1px solid #334155;
+		border: 1px solid var(--border);
 		border-radius: 0.9rem;
-		background: rgba(2, 6, 23, 0.58);
+		background: var(--surface-muted);
 	}
 
 	.ranked-list li {
@@ -486,12 +478,12 @@
 	.response-updated,
 	.response-count,
 	.empty-state {
-		color: #cbd5e1;
+		color: var(--text);
 	}
 
 	.response-name {
 		font-weight: 700;
-		color: #f8fafc;
+		color: var(--text-strong);
 	}
 
 	.response-email,
@@ -504,7 +496,7 @@
 	.response-email,
 	.response-updated,
 	.empty-state {
-		color: #94a3b8;
+		color: var(--text-muted);
 	}
 
 	.response-count {
@@ -521,9 +513,9 @@
 	.date-pill-list li {
 		padding: 0.45rem 0.75rem;
 		border-radius: 999px;
-		background: rgba(14, 165, 233, 0.16);
-		border: 1px solid rgba(56, 189, 248, 0.28);
-		color: #e0f2fe;
+		background: rgba(64, 139, 239, 0.1);
+		border: 1px solid rgba(64, 139, 239, 0.2);
+		color: var(--text-strong);
 	}
 
 	@media (max-width: 700px) {
