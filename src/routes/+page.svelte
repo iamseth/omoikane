@@ -14,18 +14,19 @@
 
 <div class="page">
 	<section>
-		<p class="eyebrow">Slice S02</p>
+		<p class="eyebrow">Slice S03</p>
 		<h1>Omoikane</h1>
 		<p class="lede">
 			A lightweight scheduling app for small groups to find the best date for an event.
 		</p>
+		<p class="cta"><a href="/new">Create your first event</a></p>
 	</section>
 
 	<section>
 		<h2>Current state</h2>
 		<p>
-			The application scaffold now includes SQLite persistence with automatic schema creation on
-			first server access.
+			The application now includes SQLite persistence plus the first event creation flow with
+			public and admin URLs.
 		</p>
 		<div class="status-card">
 			<p><strong>Database path</strong>: <code>{data.databasePath}</code></p>
@@ -93,11 +94,26 @@
 	}
 
 	.lede,
+	.cta,
 	li,
 	section p {
 		color: #cbd5e1;
 		font-size: 1.05rem;
 		line-height: 1.7;
+	}
+
+	.cta {
+		margin-top: 1.5rem;
+	}
+
+	.cta a {
+		display: inline-flex;
+		padding: 0.85rem 1.25rem;
+		border-radius: 999px;
+		background: linear-gradient(135deg, #38bdf8, #818cf8);
+		color: #020617;
+		font-weight: 700;
+		text-decoration: none;
 	}
 
 	ul {

@@ -139,6 +139,13 @@ export function getEventBySlug(slug: string) {
 	return db.prepare('select * from events where slug = ?').get(slug) as EventRecord | undefined;
 }
 
+export function getEventByAdminTokenHash(adminTokenHash: string) {
+	const db = initDatabase();
+	return db
+		.prepare('select * from events where admin_token_hash = ?')
+		.get(adminTokenHash) as EventRecord | undefined;
+}
+
 export function getEventCount() {
 	const db = initDatabase();
 	const row = db.prepare('select count(*) as count from events').get() as { count: number };

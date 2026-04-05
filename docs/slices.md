@@ -8,7 +8,7 @@ This document breaks the initial product plan into small, implementation-oriente
 | --- | --- | --- | --- |
 | S01 | Scaffold app and local tooling | Done | - |
 | S02 | Database schema and persistence setup | Done | S01 |
-| S03 | Event creation flow | Todo | S01, S02 |
+| S03 | Event creation flow | Done | S01, S02 |
 | S04 | Public event page shell | Todo | S03 |
 | S05 | Interactive monthly calendar selection | Todo | S04 |
 | S06 | Save and update attendee availability | Todo | S05 |
