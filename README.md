@@ -1,5 +1,7 @@
 # Omoikane
 
+![Omoikane logo](docs/assets/logo.png)
+
 [![Coverage](https://img.shields.io/badge/coverage-96.61%25-brightgreen)](./coverage/index.html)
 [![Quality](https://img.shields.io/badge/quality-checks%20passing-brightgreen)](https://github.com/iamseth/omoikane/actions/workflows/ci.yml)
 [![Actions](https://img.shields.io/github/actions/workflow/status/iamseth/omoikane/ci.yml?branch=master&label=actions)](https://github.com/iamseth/omoikane/actions/workflows/ci.yml)
