@@ -16,6 +16,8 @@ This document breaks the initial product plan into small, implementation-oriente
 | S08 | Admin token flow and event management | Done | S03 |
 | S09 | Mobile polish and accessibility pass | Done | S05, S07 |
 | S10 | Docker Compose deployment | Done | S07 |
+| S11 | Bug fixes from initial review | Todo | S10 |
+| S12 | Fix Docker Hub publish in CI | Todo | S10 |
 
 Status values: `Todo`, `In Progress`, `Done`, `Blocked`
 
@@ -236,6 +238,75 @@ Progress update (2026-04-04):
 - Documented the container startup flow and supported runtime environment variables in `README.md`.
 - Verified the production container boots successfully and serves the app with the SQLite database stored in the mounted `data` directory.
 
+## S11: Bug fixes from initial review
+
+Goal: fix correctness and safety bugs found during the post-S10 code review.
+
+### S11-A: Validate timezone on event creation and update
+
+**Files:** `src/routes/new/+page.server.ts`, `src/routes/admin/[token]/+page.server.ts`
+
+The server accepts any non-empty string as a timezone. An invalid value like `"FakeZone"` is stored and then passed to `Intl.DateTimeFormat` on the public event page, which throws a `RangeError` and breaks the entire page with a 500.
+
+Fix: add a validation step in `validateValues` for both the creation and admin forms. Use `Intl.supportedValuesOf('timeZone')` to check that the submitted timezone is recognized. Return a 400 with a clear error message if it is not.
+
+### S11-B: Handle slug collision error in event creation
+
+**Files:** `src/routes/new/+page.server.ts`, `src/lib/server/event-identity.ts`
+
+`generateEventSlug` checks for slug uniqueness via a SELECT, then returns the slug for a later INSERT. This is a TOCTOU race: two concurrent requests can both pass the check, and the second INSERT will fail with an unhandled SQLite unique-constraint error, surfacing as a 500.
+
+Fix: wrap the `createEvent` call in `new/+page.server.ts` in a try/catch. On a unique-constraint error, retry slug generation and creation once. Alternatively, remove the pre-check from `generateEventSlug` entirely and rely on the database constraint, retrying on conflict.
+
+### S11-C: Mark admin link cookie as `secure` in production
+
+**File:** `src/routes/new/+page.server.ts`
+
+The flash cookie that carries the admin token path does not set `secure: true`. In a production HTTPS deployment the cookie can leak over a plain HTTP request. Since the admin token is a bearer secret, this is a meaningful exposure.
+
+Fix: set `secure: true` on the cookie when the app is not running in dev mode. SvelteKit exposes this via `import { dev } from '$app/environment'`.
+
+### S11-D: Normalize description coercion in `updateEvent`
+
+**File:** `src/lib/server/database.ts`
+
+`createEvent` coerces a missing description with `input.description ?? null` (nullish coalescing), but `updateEvent` uses `input.description ? input.description : null` (truthiness). The truthiness check would silently drop a description value of `"0"`. While unlikely, the inconsistency is a latent bug.
+
+Fix: change line 201 in `updateEvent` to use `input.description ?? null` to match `createEvent`.
+
+Acceptance criteria:
+- An invalid timezone returns a 400 with a user-facing error on both creation and admin edit forms.
+- Concurrent event creation does not produce a 500 from a slug collision.
+- The admin link cookie is marked `secure` outside of dev mode.
+- `updateEvent` preserves any truthy-but-falsy description value.
+
+## S12: Fix Docker Hub publish in CI
+
+Goal: make the existing CI workflow actually push images to Docker Hub.
+
+**File:** `.github/workflows/ci.yml`
+
+The "Log in to Docker Hub" and "Build and push Docker image" steps both gate on `${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}`. These `env` references point to the step-level `env` block, but GitHub Actions evaluates `if` expressions *before* applying the step's `env`, so the variables are always empty and both steps are silently skipped on every run.
+
+Fix: change the `if` conditions on both steps to reference secrets directly:
+
+```yaml
+if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+```
+
+Then remove the step-level `env` blocks from both steps since they are no longer needed for the condition check. The `docker/login-action` and `docker/build-push-action` steps already reference `secrets.*` directly in their `with` blocks.
+
+Additionally, consider restricting the push to the `master` branch only so that feature-branch pushes don't publish images:
+
+```yaml
+if: github.ref == 'refs/heads/master' && secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != ''
+```
+
+Acceptance criteria:
+- Pushing to `master` with valid `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets publishes a Docker image tagged with the commit SHA and branch name.
+- Pushes to non-`master` branches skip the publish steps without error.
+- The workflow still runs lint, build, and test on all branches.
+
 ## Suggested Slice Order
 
 1. S01
@@ -248,6 +319,8 @@ Progress update (2026-04-04):
 8. S08
 9. S09
 10. S10
+11. S11
+12. S12
 
 ## Implementation Rules For Future Agents
 

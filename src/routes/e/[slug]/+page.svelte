@@ -75,18 +75,8 @@
 	const createdAdminPath = $derived(data.createdAdminPath);
 	const rankedDates = $derived(data.rankedDates);
 	const todayKey = $derived(getTodayKey(event.timezone));
-	let hasInitializedVisibleMonth = false;
-	let visibleMonth = $state<MonthView>({ year: 0, monthIndex: 0 });
-	let selectedDates = $state<string[]>([]);
-
-	$effect(() => {
-		if (hasInitializedVisibleMonth) {
-			return;
-		}
-
-		visibleMonth = getInitialMonth(event.timezone);
-		hasInitializedVisibleMonth = true;
-	});
+	let visibleMonth = $state<MonthView>(getInitialMonth(event.timezone));
+	let selectedDates = $state<string[]>(parseSelectedDatesValue(form?.values?.selectedDates));
 
 	$effect(() => {
 		selectedDates = parseSelectedDatesValue(form?.values?.selectedDates);
