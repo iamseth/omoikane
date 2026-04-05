@@ -1,42 +1,33 @@
-# sv
+# Omoikane
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Omoikane is a small scheduling app for finding the best date for a group event.
 
-## Creating a project
+## Local Development
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
+Install dependencies and start the dev server:
 
 ```sh
-# recreate this project
-npx sv@0.14.0 create --template minimal --types ts --add sveltekit-adapter="adapter:node" --no-download-check --install npm .
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+Run the Svelte and TypeScript checks with:
 
-To create a production version of your app:
+```sh
+npm run check
+```
+
+Create a production build with:
 
 ```sh
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+## Database
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+The app uses SQLite through `better-sqlite3`.
+
+- Default database path: `data/omoikane.sqlite`
+- Override with: `DATABASE_PATH=/absolute/path/to/omoikane.sqlite`
+
+The database schema is created automatically on first server access.

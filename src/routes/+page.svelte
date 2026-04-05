@@ -1,8 +1,10 @@
 <script lang="ts">
+	let { data } = $props();
+
 	const nextSteps = [
-		'Create the SQLite schema and initialization flow.',
 		'Build event creation with a public slug and secret admin URL.',
-		'Render the event calendar and availability selection UI.'
+		'Render the event page shell with the monthly calendar.',
+		'Add participant availability submission and ranked results.'
 	];
 </script>
 
@@ -12,7 +14,7 @@
 
 <div class="page">
 	<section>
-		<p class="eyebrow">Slice S01</p>
+		<p class="eyebrow">Slice S02</p>
 		<h1>Omoikane</h1>
 		<p class="lede">
 			A lightweight scheduling app for small groups to find the best date for an event.
@@ -22,8 +24,13 @@
 	<section>
 		<h2>Current state</h2>
 		<p>
-			The application scaffold is in place with SvelteKit, TypeScript, and the Node adapter.
+			The application scaffold now includes SQLite persistence with automatic schema creation on
+			first server access.
 		</p>
+		<div class="status-card">
+			<p><strong>Database path</strong>: <code>{data.databasePath}</code></p>
+			<p><strong>Stored events</strong>: {data.eventCount}</p>
+		</div>
 	</section>
 
 	<section>
@@ -100,6 +107,22 @@
 	code {
 		font-family: 'SFMono-Regular', ui-monospace, SFMono-Regular, Menlo, monospace;
 		font-size: 0.95em;
+	}
+
+	strong {
+		color: #f8fafc;
+	}
+
+	.status-card {
+		margin-top: 1rem;
+		padding: 1rem 1.125rem;
+		border: 1px solid #334155;
+		border-radius: 0.75rem;
+		background: rgba(15, 23, 42, 0.65);
+	}
+
+	.status-card p + p {
+		margin-top: 0.5rem;
 	}
 
 	@media (max-width: 640px) {
