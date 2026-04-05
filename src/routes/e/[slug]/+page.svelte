@@ -60,16 +60,13 @@
 	const weekdayLabels = Array.from({ length: 7 }, (_, index) => {
 		return weekdayFormatter.format(new Date(Date.UTC(2024, 0, index + 7)));
 	});
+	const initialVisibleMonth = getInitialMonth(data.event.timezone);
 
 	const event = $derived(data.event);
 	const createdAdminPath = $derived(data.createdAdminPath);
 	const todayKey = $derived(getTodayKey(event.timezone));
-	let visibleMonth = $state<MonthView>({ year: 0, monthIndex: 0 });
+	let visibleMonth = $state<MonthView>(initialVisibleMonth);
 	let selectedDates = $state<string[]>([]);
-
-	$effect(() => {
-		visibleMonth = getInitialMonth(event.timezone);
-	});
 
 	$effect(() => {
 		selectedDates = parseSelectedDatesValue(form?.values?.selectedDates);
@@ -114,25 +111,41 @@
 			: [...selectedDates, date];
 	}
 
-	function getTodayKey(timeZone: string) {
-		const formatter = new Intl.DateTimeFormat('en-CA', {
+	function getDatePartsInTimeZone(
+		timeZone: string,
+		options: Intl.DateTimeFormatOptions
+	): Record<string, string> {
+		const formatter = new Intl.DateTimeFormat('en', {
 			timeZone,
+			...options
+		});
+
+		return Object.fromEntries(
+			formatter
+				.formatToParts(new Date())
+				.filter((part) => part.type !== 'literal')
+				.map((part) => [part.type, part.value])
+		);
+	}
+
+	function getTodayKey(timeZone: string) {
+		const parts = getDatePartsInTimeZone(timeZone, {
 			year: 'numeric',
 			month: '2-digit',
 			day: '2-digit'
 		});
 
-		return formatter.format(new Date());
+		return `${parts.year}-${parts.month}-${parts.day}`;
 	}
 
 	function getInitialMonth(timeZone: string): MonthView {
-		const formatter = new Intl.DateTimeFormat('en-CA', {
-			timeZone,
+		const parts = getDatePartsInTimeZone(timeZone, {
 			year: 'numeric',
 			month: '2-digit'
 		});
 
-		const [year, month] = formatter.format(new Date()).split('-').map(Number);
+		const year = Number(parts.year);
+		const month = Number(parts.month);
 
 		return {
 			year,
