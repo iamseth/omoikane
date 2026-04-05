@@ -34,6 +34,7 @@
 		--surface: rgba(255, 255, 255, 0.9);
 		--surface-strong: #ffffff;
 		--surface-muted: rgba(255, 248, 238, 0.92);
+		--surface-glow: rgba(255, 255, 255, 0.72);
 		--text: #27467f;
 		--text-strong: #17345f;
 		--text-muted: #5f7090;
@@ -48,12 +49,19 @@
 		--success: #2fb95a;
 		--danger: #e24a8d;
 		--shadow: 0 24px 60px rgba(39, 70, 127, 0.12);
+		--shadow-soft: 0 18px 40px rgba(39, 70, 127, 0.08);
+		--shadow-button: 0 14px 28px rgba(244, 81, 151, 0.18);
+		--panel-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
 	}
 
 	:global(body) {
 		margin: 0;
 		font-family:
 			Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+		line-height: 1.5;
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
 		background:
 			radial-gradient(circle at top, rgba(255, 202, 34, 0.18), transparent 24rem),
 			radial-gradient(circle at right top, rgba(64, 139, 239, 0.18), transparent 22rem),
@@ -61,8 +69,16 @@
 		color: var(--text);
 	}
 
+	:global(::selection) {
+		background: rgba(244, 81, 151, 0.2);
+		color: var(--text-strong);
+	}
+
 	:global(a) {
 		color: var(--accent-blue);
+		text-decoration-thickness: 0.08em;
+		text-underline-offset: 0.18em;
+		transition: color 160ms ease;
 	}
 
 	:global(a:hover) {
@@ -71,6 +87,20 @@
 
 	.app-shell {
 		min-height: 100vh;
+		position: relative;
+		isolation: isolate;
+	}
+
+	.app-shell::before {
+		content: '';
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+		pointer-events: none;
+		background:
+			radial-gradient(circle at 14% 18%, rgba(53, 201, 95, 0.08), transparent 18rem),
+			radial-gradient(circle at 82% 24%, rgba(244, 81, 151, 0.08), transparent 22rem),
+			radial-gradient(circle at 66% 74%, rgba(125, 100, 216, 0.08), transparent 20rem);
 	}
 
 	.site-header {
@@ -93,8 +123,25 @@
 			radial-gradient(circle at 92% 72%, rgba(64, 139, 239, 0.14), transparent 12rem),
 			linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 250, 245, 0.92));
 		box-shadow: var(--shadow);
+		backdrop-filter: blur(18px);
+		-webkit-backdrop-filter: blur(18px);
+		box-shadow: var(--panel-highlight), var(--shadow);
 		text-decoration: none;
 		overflow: hidden;
+		position: relative;
+		transition:
+			transform 160ms ease,
+			box-shadow 160ms ease,
+			border-color 160ms ease;
+	}
+
+	.brand::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(115deg, transparent 18%, rgba(255, 255, 255, 0.36) 38%, transparent 58%);
+		opacity: 0.6;
+		pointer-events: none;
 	}
 
 	.brand img {
@@ -111,6 +158,16 @@
 	.brand:focus-visible {
 		outline: 2px solid var(--accent-blue);
 		outline-offset: 4px;
+	}
+
+	.brand:hover {
+		transform: translateY(-1px);
+		border-color: rgba(39, 70, 127, 0.2);
+		box-shadow: var(--panel-highlight), 0 28px 64px rgba(39, 70, 127, 0.14);
+	}
+
+	:global(main) {
+		padding-bottom: 2rem;
 	}
 
 	@media (max-width: 640px) {

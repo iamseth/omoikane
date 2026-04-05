@@ -85,6 +85,7 @@
 
 	.hero {
 		margin-bottom: 2rem;
+		max-width: 38rem;
 	}
 
 	.eyebrow {
@@ -106,6 +107,7 @@
 	h1 {
 		font-size: clamp(2.25rem, 5vw, 3.75rem);
 		line-height: 1.05;
+		letter-spacing: -0.04em;
 	}
 
 	.lede {
@@ -122,7 +124,10 @@
 		border: 1px solid var(--border);
 		border-radius: 1rem;
 		background: var(--surface);
-		box-shadow: var(--shadow);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		box-shadow: var(--panel-highlight), var(--shadow-soft);
+		overflow: hidden;
 	}
 
 	label {
@@ -151,6 +156,16 @@
 		border-radius: 0.75rem;
 		background: var(--surface-strong);
 		color: var(--text);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+		transition:
+			border-color 160ms ease,
+			box-shadow 160ms ease,
+			background-color 160ms ease;
+	}
+
+	input:hover,
+	textarea:hover {
+		border-color: rgba(39, 70, 127, 0.32);
 	}
 
 	input:focus,
@@ -158,6 +173,7 @@
 	button:focus {
 		outline: 2px solid var(--accent-blue);
 		outline-offset: 2px;
+		border-color: rgba(64, 139, 239, 0.32);
 	}
 
 	textarea {
@@ -166,6 +182,8 @@
 
 	button {
 		justify-self: start;
+		display: inline-flex;
+		align-items: center;
 		padding: 0.85rem 1.25rem;
 		border: 0;
 		border-radius: 999px;
@@ -173,6 +191,13 @@
 		color: #ffffff;
 		font-weight: 700;
 		cursor: pointer;
+		box-shadow: var(--shadow-button);
+		transition: transform 160ms ease, box-shadow 160ms ease;
+	}
+
+	button:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 18px 34px rgba(244, 81, 151, 0.24);
 	}
 
 	.date-grid {

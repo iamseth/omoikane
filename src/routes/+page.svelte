@@ -59,7 +59,18 @@
 		border: 1px solid var(--border);
 		border-radius: 1.25rem;
 		background: var(--surface);
-		box-shadow: var(--shadow);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		box-shadow: var(--panel-highlight), var(--shadow-soft);
+		position: relative;
+		overflow: hidden;
+	}
+
+	section:first-child {
+		background:
+			radial-gradient(circle at top right, rgba(255, 202, 34, 0.18), transparent 12rem),
+			radial-gradient(circle at 78% 76%, rgba(64, 139, 239, 0.12), transparent 14rem),
+			var(--surface);
 	}
 
 	section + section {
@@ -77,11 +88,13 @@
 		font-size: clamp(2.5rem, 6vw, 4.5rem);
 		line-height: 1;
 		margin-top: 0.5rem;
+		letter-spacing: -0.04em;
 	}
 
 	h2 {
 		font-size: 1.125rem;
 		margin-bottom: 0.75rem;
+		letter-spacing: -0.02em;
 	}
 
 	.eyebrow {
@@ -101,12 +114,17 @@
 		line-height: 1.7;
 	}
 
+	.lede {
+		max-width: 34rem;
+	}
+
 	.cta {
 		margin-top: 1.5rem;
 	}
 
 	.cta a {
 		display: inline-flex;
+		align-items: center;
 		padding: 0.85rem 1.25rem;
 		border-radius: 999px;
 		background: linear-gradient(
@@ -119,7 +137,13 @@
 		color: #ffffff;
 		font-weight: 700;
 		text-decoration: none;
-		box-shadow: 0 16px 30px rgba(244, 81, 151, 0.22);
+		box-shadow: var(--shadow-button);
+		transition: transform 160ms ease, box-shadow 160ms ease;
+	}
+
+	.cta a:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 18px 34px rgba(244, 81, 151, 0.24);
 	}
 
 	ul {
@@ -141,6 +165,7 @@
 		border: 1px solid rgba(64, 139, 239, 0.18);
 		border-radius: 0.75rem;
 		background: var(--surface-muted);
+		box-shadow: var(--panel-highlight);
 	}
 
 	.status-card p + p {

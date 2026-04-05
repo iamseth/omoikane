@@ -542,13 +542,17 @@
 		border: 1px solid var(--border);
 		border-radius: 1rem;
 		background: var(--surface);
-		box-shadow: var(--shadow);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		box-shadow: var(--panel-highlight), var(--shadow-soft);
+		overflow: hidden;
 	}
 
 	.admin-banner {
 		margin-bottom: 1rem;
 		border-color: rgba(64, 139, 239, 0.28);
 		background: rgba(64, 139, 239, 0.08);
+		box-shadow: var(--panel-highlight), var(--shadow-soft);
 	}
 
 	.eyebrow {
@@ -572,6 +576,7 @@
 	h1 {
 		font-size: clamp(2.25rem, 5vw, 3.75rem);
 		line-height: 1.05;
+		letter-spacing: -0.04em;
 	}
 
 	.description {
@@ -620,6 +625,14 @@
 		border-radius: 0.85rem;
 		background: var(--surface-muted);
 		color: var(--text);
+		box-shadow: var(--panel-highlight);
+		transition: transform 160ms ease, box-shadow 160ms ease;
+	}
+
+	.best-options li:hover,
+	.ranked-results li:hover {
+		transform: translateY(-1px);
+		box-shadow: var(--panel-highlight), 0 14px 26px rgba(39, 70, 127, 0.08);
 	}
 
 	.best-options li strong,
@@ -669,12 +682,22 @@
 		border-radius: 0.75rem;
 		background: var(--surface-strong);
 		color: var(--text);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+		transition:
+			border-color 160ms ease,
+			box-shadow 160ms ease,
+			background-color 160ms ease;
+	}
+
+	input:hover {
+		border-color: rgba(39, 70, 127, 0.32);
 	}
 
 	input:focus,
 	button:focus {
 		outline: 2px solid var(--accent-blue);
 		outline-offset: 2px;
+		border-color: rgba(64, 139, 239, 0.32);
 	}
 
 	small,
@@ -718,6 +741,8 @@
 		color: #ffffff;
 		font-weight: 800;
 		cursor: pointer;
+		box-shadow: var(--shadow-button);
+		transition: transform 160ms ease, box-shadow 160ms ease;
 	}
 
 	.form-actions {
@@ -735,6 +760,26 @@
 		color: var(--text);
 		font-weight: 700;
 		cursor: pointer;
+		transition:
+			transform 160ms ease,
+			background-color 160ms ease,
+			border-color 160ms ease;
+	}
+
+	.save-button:hover,
+	.load-button:hover,
+	.nav-button:hover {
+		transform: translateY(-1px);
+	}
+
+	.save-button:hover {
+		box-shadow: 0 18px 34px rgba(244, 81, 151, 0.24);
+	}
+
+	.load-button:hover,
+	.nav-button:hover {
+		border-color: rgba(39, 70, 127, 0.28);
+		background: rgba(255, 255, 255, 0.96);
 	}
 
 	.save-button:disabled,
@@ -774,6 +819,10 @@
 		background: var(--surface-strong);
 		color: var(--text);
 		cursor: pointer;
+		transition:
+			transform 160ms ease,
+			background-color 160ms ease,
+			border-color 160ms ease;
 	}
 
 	.weekday-row,
@@ -802,6 +851,12 @@
 		border-radius: 1rem;
 		background: var(--surface-muted);
 		color: var(--text);
+		box-shadow: var(--panel-highlight);
+		transition:
+			transform 160ms ease,
+			border-color 160ms ease,
+			background-color 160ms ease,
+			box-shadow 160ms ease;
 	}
 
 	.day-button {
@@ -816,6 +871,12 @@
 		background: transparent;
 		color: inherit;
 		cursor: pointer;
+	}
+
+	.day:has(.day-button:hover:not(:disabled)) {
+		transform: translateY(-1px);
+		border-color: rgba(39, 70, 127, 0.24);
+		box-shadow: var(--panel-highlight), 0 12px 24px rgba(39, 70, 127, 0.08);
 	}
 
 	.day span {

@@ -268,7 +268,10 @@
 		border: 1px solid var(--border);
 		border-radius: 1rem;
 		background: var(--surface);
-		box-shadow: var(--shadow);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		box-shadow: var(--panel-highlight), var(--shadow-soft);
+		overflow: hidden;
 	}
 
 	.hero,
@@ -309,6 +312,7 @@
 	h1 {
 		font-size: clamp(2.25rem, 5vw, 3.75rem);
 		line-height: 1.05;
+		letter-spacing: -0.04em;
 	}
 
 	.lede,
@@ -362,6 +366,16 @@
 		border-radius: 0.75rem;
 		background: var(--surface-strong);
 		color: var(--text);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+		transition:
+			border-color 160ms ease,
+			box-shadow 160ms ease,
+			background-color 160ms ease;
+	}
+
+	input:hover,
+	textarea:hover {
+		border-color: rgba(39, 70, 127, 0.32);
 	}
 
 	textarea {
@@ -373,6 +387,7 @@
 	button:focus {
 		outline: 2px solid var(--accent-blue);
 		outline-offset: 2px;
+		border-color: rgba(64, 139, 239, 0.32);
 	}
 
 	small,
@@ -413,10 +428,22 @@
 		justify-self: start;
 		background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));
 		color: #ffffff;
+		box-shadow: var(--shadow-button);
+		transition: transform 160ms ease, box-shadow 160ms ease;
+	}
+
+	.primary-button:hover,
+	.status-button:hover {
+		transform: translateY(-1px);
+	}
+
+	.primary-button:hover {
+		box-shadow: 0 18px 34px rgba(244, 81, 151, 0.24);
 	}
 
 	.status-pill {
 		font-size: 0.95rem;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 	}
 
 	.event-open {
@@ -457,6 +484,14 @@
 		border: 1px solid var(--border);
 		border-radius: 0.9rem;
 		background: var(--surface-muted);
+		box-shadow: var(--panel-highlight);
+		transition: transform 160ms ease, box-shadow 160ms ease;
+	}
+
+	.ranked-list li:hover,
+	.response-list li:hover {
+		transform: translateY(-1px);
+		box-shadow: var(--panel-highlight), 0 14px 26px rgba(39, 70, 127, 0.08);
 	}
 
 	.ranked-list li {
